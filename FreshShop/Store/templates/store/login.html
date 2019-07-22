@@ -1,56 +1,83 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
-	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-	<title>天天生鲜-登录</title>
-	<link rel="stylesheet" type="text/css" href="/static/store/css/reset.css">
-	<link rel="stylesheet" type="text/css" href="/static/store/css/main.css">
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>SB Admin 2 - Register</title>
+
+  <!-- Custom fonts for this template-->
+  <link href="/static/store/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
+  <!-- Custom styles for this template-->
+  <link href="/static/store/css/sb-admin-2.min.css" rel="stylesheet">
+
 </head>
-<body>
-	<div class="login_top clearfix">
-		<a href="index.html" class="login_logo"><img src="/static/store/images/logo02.png"></a>	
-	</div>
 
-	<div class="login_form_bg">
-		<div class="login_form_wrap clearfix">
-			<div class="login_banner fl"></div>
-			<div class="slogan fl">日夜兼程 · 急速送达</div>
-			<div class="login_form fr">
-				<div class="login_title clearfix">
-					<h1>用户登录</h1>
-					<a href="#">立即注册</a>
-				</div>
-				<div class="form_input">
-					<form>
-						<input type="text" name="username" class="name_input" placeholder="请输入用户名">
-						<div class="user_error">输入错误</div>
-						<input type="password" name="pwd" class="pass_input" placeholder="请输入密码">
-						<div class="pwd_error">输入错误</div>
-						<div class="more_input clearfix">
-							<input type="checkbox" name="">
-							<label>记住用户名</label>
-							<a href="#">忘记密码</a>
-						</div>
-						<input type="submit" name="" value="登录" class="input_submit">
-					</form>
-				</div>
-			</div>
-		</div>
-	</div>
+<body class="bg-gradient-primary">
 
-	<div class="footer no-mp">
-		<div class="foot_link">
-			<a href="#">关于我们</a>
-			<span>|</span>
-			<a href="#">联系我们</a>
-			<span>|</span>
-			<a href="#">招聘人才</a>
-			<span>|</span>
-			<a href="#">友情链接</a>		
-		</div>
-		<p>CopyRight © 2016 北京天天生鲜信息技术有限公司 All Rights Reserved</p>
-		<p>电话：010-****888    京ICP备*******8号</p>
-	</div>
-	
+  <div class="container">
+
+    <div class="card o-hidden border-0 shadow-lg my-5">
+      <div class="card-body p-0">
+        <!-- Nested Row within Card Body -->
+        <div class="row">
+          <div class="col-lg-5 d-none d-lg-block bg-register-image"></div>
+          <div class="col-lg-7">
+            <div class="p-5">
+              <div class="text-center">
+                <h1 class="h4 text-gray-900 mb-4">登录</h1>
+              </div>
+              <form class="user" method="post">
+                  {% csrf_token %}
+                <div class="form-group">
+                  <input type="text" class="form-control form-control-user" name="username" placeholder="账号">
+                </div>
+                <div class="form-group">
+                  <input type="password" class="form-control form-control-user" name="password" placeholder="密码">
+                </div>
+                <div class="form-group">
+                  <input type="submit" class="btn btn-primary btn-user btn-block" value="登录" placeholder="登录">
+                </div>
+                <hr>
+{#                <a href="/static/store/index.html" class="btn btn-google btn-user btn-block">#}
+{#                  <i class="fab fa-google fa-fw"></i> Register with Google#}
+{#                </a>#}
+{#                <a href="/static/store/index.html" class="btn btn-facebook btn-user btn-block">#}
+{#                  <i class="fab fa-facebook-f fa-fw"></i> Register with Facebook#}
+{#                </a>#}
+              </form>
+              <hr>
+              <div class="text-center">
+                <a class="small" href="#">忘记密码?</a>
+              </div>
+              <div class="text-center">
+                <a class="small" href="/store/register/">未注册? 注册</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bootstrap core JavaScript-->
+  <script src="/static/store/vendor/jquery/jquery.min.js"></script>
+  <script src="/static/store/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Core plugin JavaScript-->
+  <script src="/static/store/vendor/jquery-easing/jquery.easing.min.js"></script>
+
+  <!-- Custom scripts for all pages-->
+  <script src="/static/store/js/sb-admin-2.min.js"></script>
+
 </body>
+
 </html>
