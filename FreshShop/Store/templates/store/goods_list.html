@@ -1,0 +1,49 @@
+{% extends 'store/base.html' %}
+
+{% block titie %}
+    商品列表
+{% endblock %}
+
+{% block label %}
+    <a href="/store/add_goods/" class="btn btn-warning">添加商品</a>
+{% endblock %}
+
+{% block container %}
+    <table class="table">
+        <thead class="table-info">
+        <tr>
+            <th>商品名称</td>
+            <th>商品价格</td>
+            <th>商品数量</td>
+            <th>出厂日期</td>
+            <th>保质期</td>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody class="table-active">
+            {% for goods in page %}
+                <tr>
+                    <td>{{ goods.goods_name }}</td>
+                    <td>{{ goods.goods_price }}</td>
+                    <td>{{ goods.goods_number }}</td>
+                    <td>{{ goods.goods_safeDate }}</td>
+                    <td>{{ goods.goods_name }}</td>
+                    <td>
+                        <a href="#" class="btn btn-warning">下架</a>
+                        <a href="#" class="btn btn-success">销毁</a>
+                    </td>
+                </tr>
+
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="dataTables_paginate paging_simple_numbers">
+        <ul class="pagination">
+            {% for p in page_range %}
+                <li class="paginate_button page-item">
+                    <a class="page-link" href="?keywords={{ keywords }}&page_num={{ p }}">{{ p }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endblock %}

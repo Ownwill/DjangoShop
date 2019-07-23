@@ -39,42 +39,53 @@
         <div class="sidebar-brand-icon rotate-n-15">
           <i class="fas fa-laugh-wink"></i>
         </div>
-        <div class="sidebar-brand-text mx-3">网站管理系统<sup>2</sup></div>
+        <div class="sidebar-brand-text mx-3">网站管理平台</div>
       </a>
 
       <!-- Divider -->
       <hr class="sidebar-divider my-0">
 
       <!-- Nav Item - Dashboard -->
+        {% if is_store %}
       <li class="nav-item">
         <a class="nav-link" href="/store/index/">
           <i class="fas fa-fw fa-tachometer-alt"></i>
-          <span>Dashboard</span></a>
+          <span>店铺管理</span></a>
       </li>
+            {% else %}
+            <li class="nav-item">
+        <a class="nav-link" href="/store/register_store/">
+          <i class="fas fa-fw fa-tachometer-alt"></i>
+          <span>您没有店铺，请注册</span></a>
+      </li>
+
+        {% endif %}
 
       <!-- Divider -->
       <hr class="sidebar-divider">
 
       <!-- Heading -->
       <div class="sidebar-heading">
-        Interface
+        销售管理
       </div>
 
       <!-- Nav Item - Pages Collapse Menu -->
       <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
           <i class="fas fa-fw fa-cog"></i>
-          <span>Components</span>
+          <span>商品信息</span>
         </a>
         <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
           <div class="bg-white py-2 collapse-inner rounded">
             <h6 class="collapse-header">Custom Components:</h6>
-            <a class="collapse-item" href="/store/buttons/">Buttons</a>
-            <a class="collapse-item" href="/store/cards/">Cards</a>
+            <a class="collapse-item" href="/store/add_goods/">添加商品</a>
+            <a class="collapse-item" href="/store/list_goods/">商品列表</a>
+            <a class="collapse-item" href="/store/buttons/">商品详情</a>
+            <a class="collapse-item" href="/store/cards/">删除商品</a>
           </div>
         </div>
       </li>
-
+{##}
       <!-- Nav Item - Utilities Collapse Menu -->
       <li class="nav-item">
         <a class="nav-link collapsed" href="/static/store/#" data-toggle="collapse" data-target="#collapseUtilities" aria-expanded="true" aria-controls="collapseUtilities">
@@ -90,48 +101,6 @@
             <a class="collapse-item" href="/store/utiOth/">Other</a>
           </div>
         </div>
-      </li>
-
-      <!-- Divider -->
-      <hr class="sidebar-divider">
-
-      <!-- Heading -->
-      <div class="sidebar-heading">
-        Addons
-      </div>
-
-      <!-- Nav Item - Pages Collapse Menu -->
-      <li class="nav-item active">
-        <a class="nav-link" href="/static/store/#" data-toggle="collapse" data-target="#collapsePages" aria-expanded="true" aria-controls="collapsePages">
-          <i class="fas fa-fw fa-folder"></i>
-          <span>Pages</span>
-        </a>
-        <div id="collapsePages" class="collapse show" aria-labelledby="headingPages" data-parent="#accordionSidebar">
-          <div class="bg-white py-2 collapse-inner rounded">
-            <h6 class="collapse-header">Login Screens:</h6>
-            <a class="collapse-item" href="/store/login/">Login</a>
-            <a class="collapse-item" href="/store/register/">Register</a>
-            <a class="collapse-item" href="/store/forgotPwd/">Forgot Password</a>
-            <div class="collapse-divider"></div>
-            <h6 class="collapse-header">Other Pages:</h6>
-            <a class="collapse-item active" href="/store/page_404/">404 Page</a>
-            <a class="collapse-item" href="/store/blank/">Blank Page</a>
-          </div>
-        </div>
-      </li>
-
-      <!-- Nav Item - Charts -->
-      <li class="nav-item">
-        <a class="nav-link" href="/store/charts/">
-          <i class="fas fa-fw fa-chart-area"></i>
-          <span>Charts</span></a>
-      </li>
-
-      <!-- Nav Item - Tables -->
-      <li class="nav-item">
-        <a class="nav-link" href="/store/tables/">
-          <i class="fas fa-fw fa-table"></i>
-          <span>Tables</span></a>
       </li>
 
       <!-- Divider -->
@@ -162,9 +131,9 @@
           <!-- Topbar Search -->
           <form class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
             <div class="input-group">
-              <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2">
+              <input type="text" name="keywords" value="{{ keywords }}" class="form-control bg-light border-0 small" placeholder="搜索" aria-label="Search" aria-describedby="basic-addon2">
               <div class="input-group-append">
-                <button class="btn btn-primary" type="button">
+                <button class="btn btn-primary" type="submit">
                   <i class="fas fa-search fa-sm"></i>
                 </button>
               </div>
@@ -183,9 +152,9 @@
               <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in" aria-labelledby="searchDropdown">
                 <form class="form-inline mr-auto w-100 navbar-search">
                   <div class="input-group">
-                    <input type="text" class="form-control bg-light border-0 small" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2">
+                    <input type="text" name="keywords" value="{{ keywords }}" class="form-control bg-light border-0 small" placeholder="搜索" aria-label="Search" aria-describedby="basic-addon2">
                     <div class="input-group-append">
-                      <button class="btn btn-primary" type="button">
+                      <button class="btn btn-primary" type="submit">
                         <i class="fas fa-search fa-sm"></i>
                       </button>
                     </div>
@@ -336,6 +305,10 @@
 
         <!-- Begin Page Content -->
         <div class="container-fluid">
+
+            {% block label %}
+
+            {% endblock %}
             {% block container %}
             {% endblock %}
           <!-- 404 Error Text -->
@@ -372,15 +345,15 @@
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
+          <h5 class="modal-title" id="exampleModalLabel">确定要离开吗?</h5>
           <button class="close" type="button" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">×</span>
           </button>
         </div>
-        <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
+        <div class="modal-body">如果您准备退出的话，请点击下方的确认按钮！</div>
         <div class="modal-footer">
-          <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-          <a class="btn btn-primary" href="/static/store/login.html">Logout</a>
+          <button class="btn btn-secondary" type="button" data-dismiss="modal">取消</button>
+          <a class="btn btn-primary" href="/store/logout/">确认</a>
         </div>
       </div>
     </div>
