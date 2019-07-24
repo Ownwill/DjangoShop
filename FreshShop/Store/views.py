@@ -37,6 +37,7 @@ def register(request):
             user.username = username
             user.password = set_password(password)
             user.save()
+
             return HttpResponseRedirect('/store/login/')
     return render(request,'store/register.html')
 
@@ -62,22 +63,30 @@ def login(request):
                     response.set_cookie('username',username)
                     response.set_cookie('user_id',user.id) #设施id从前台判断，有的话展示，没有的话显示注册
                     request.session['username'] = username
+                    #检验是否有店铺
+                    store = Store.objects.filter(user_id=user.id).first()
+                    if store:
+                        response.set_cookie('has_store',store.id)
+                    else:
+                        response.set_cookie('has_store','')
                     return response
     return response
 
 @UserVaild
 def index(request):
-    user_id = request.COOKIES.get('user_id')
-    if user_id:
-        user_id = int(user_id)
-    else:
-        user_id = 0
-    store = Store.objects.filter(user_id=user_id).first()
-    if store:
-        is_store = 1
-    else:
-        is_store = 0
-    return render(request,'store/index.html',{'is_store':is_store,'user_id':user_id})
+    # user_id = request.COOKIES.get('user_id')
+    # if user_id:
+    #     user_id = int(user_id)
+    # else:
+    #     user_id = 0
+    # store = Store.objects.filter(user_id=user_id).first()
+    # if store:
+    #     is_store = 1
+    # else:
+    #     is_store = 0
+    # return render(request,'store/index.html',{'is_store':is_store,'user_id':user_id})
+    return render(request,'store/index.html',locals())
+
 
 #退出
 def logout(request):
@@ -121,6 +130,9 @@ def register_store(request):
             store_type = StoreType.objects.get(id = i)
             store.type.add(store_type)
         store.save()
+        response = HttpResponseRedirect('/store/index/')
+        response.set_cookie('has_store',store.id)
+        return response
     return render(request,'store/register_store.html',locals())
 
 #添加商品
@@ -159,10 +171,16 @@ def list_goods(request):
     #获取两个关键字
     keywords = request.GET.get('keywords','')
     page_num = request.GET.get('page_num',1) #获取前台传来的页数，没有的话就默认是第一页
+
+    #获取店铺id，获取店铺
+    store_id = request.COOKIES.get('has_store')
+    store = Store.objects.get(id=int(store_id))
+
     if keywords:
-        goods_list = Goods.objects.filter(goods_name__contains=keywords) #模糊查询，字段__contains=关键字
+        #获取店铺对应的全部商品,反向查询
+        goods_list = store.goods_set.filter(goods_name__contains=keywords)#模糊查询，字段__contains=关键字
     else:
-        goods_list = Goods.objects.all()
+        goods_list = store.goods_set.all()
     paginator = Paginator(goods_list,3)
     page = paginator.page(int(page_num))
     page_range = paginator.page_range
