@@ -31,6 +31,16 @@
     <div class="form-group">
         <input type="file" class="form-control form-control-user" name="goods_image" placeholder="商品图片">
     </div>
+
+        <div class="form-group">
+            <select name="type" class="form-control form-control-user">
+                {% for t in goods_type %}
+                <option value="{{ t.id }}">{{ t.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+
     <div class="form-group">
         <input type="submit" class="btn btn-primary btn-user btn-block nav-link dropdown-toggle" value="添加商品">
     </div>

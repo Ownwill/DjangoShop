@@ -139,6 +139,7 @@ def register_store(request):
 
 #添加商品
 def add_goods(request):
+    goods_type = GoodType.objects.all()
     if request.method == "POST":
         #获取数据
         goods_name = request.POST.get('goods_name')
@@ -149,7 +150,7 @@ def add_goods(request):
         goods_safeDate = request.POST.get('goods_safeDate')
         goods_store = request.POST.get('goods_store')
         goods_image = request.FILES.get('goods_image')
-
+        goods_type_id = request.POST.get('type') #获取到所有类型,getlist
         #开始保存数据
         goods = Goods()
         goods.goods_name = goods_name
@@ -159,15 +160,17 @@ def add_goods(request):
         goods.goods_date = goods_date
         goods.goods_safeDate = goods_safeDate
         goods.goods_image = goods_image
+        goods.goods_type = GoodType.objects.get(id= goods_type_id) #一对多的保存方法
         goods.save()
+
 
         #因为是多对多关系所以需要再保存一次
         goods.store_id.add(
             Store.objects.get(id = int(goods_store))
         )
         goods.save()
-        return HttpResponseRedirect('/store/list_goods/')
-    return render(request,'store/add_goods.html')
+        return HttpResponseRedirect('/store/list_goods/up/')
+    return render(request,'store/add_goods.html',locals())
 
 #商品列表
 def list_goods(request,state):
@@ -180,7 +183,6 @@ def list_goods(request,state):
     :param state:
     :return:
     """
-
     #如果是请求
     if state == 'up':
         state_num = 1
@@ -199,6 +201,7 @@ def list_goods(request,state):
         #获取店铺对应的全部商品,反向查询
         goods_list = store.goods_set.filter(goods_name__contains=keywords,good_under=state_num)#模糊查询，字段__contains=关键字
     else:
+        print(keywords)
         goods_list = store.goods_set.filter(goods_under=state_num)
     paginator = Paginator(goods_list,3)
     page = paginator.page(int(page_num))
@@ -271,13 +274,48 @@ def set_goods(request,state):
             goods.save()
     return HttpResponseRedirect(referer)
 
+#商品类型
+def goods_type(request):
+    goods_type_list = GoodType.objects.all()
 
+    if request.method == "POST":
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        picture = request.POST.get('picture')
+        goods_type = GoodType()
+        goods_type.name = name
+        goods_type.description = description
+        goods_type.picture = picture
+        goods_type.save()
+        return HttpResponseRedirect('/store/goods_type/')
+    return render(request,'store/goods_type.html',locals())
 
+#删除商品类型
+def delete_goods_type(request):
+    goods_id = request.GET.get('id')
+    GoodType.objects.filter(id=goods_id).delete()
+    return HttpResponseRedirect('/store/goods_type/')
 
+#修改商品类型
+def update_good_type(request):
+    if request.method == "POST":
+        id = request.POST.get('id')
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        picture = request.POST.get('picture')
 
+        #修改商品
+        goods_type = GoodType.objects.get(id = id)
+        goods_type.name = name
+        goods_type.description = description
+        goods_type.picture = picture
+        goods_type.save()
+    return HttpResponseRedirect('/store/goods_type/')
 
+#指定类型商品的显示
+def show_type_goods(request):
 
-
+    return
 
 
 

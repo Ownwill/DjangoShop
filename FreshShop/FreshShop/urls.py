@@ -14,12 +14,15 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path,include
-
+from django.urls import path,include,re_path
+from Buyer.views import index #从Buyer视图引入index
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('store/',include('Store.urls')),
     path('buyer/',include('Buyer.urls')),
     path('ckeditor/',include('ckeditor_uploader.urls')),
+]
+urlpatterns +=[
+    re_path(r'^$',index), #其他路径就让他调到buyer的index页面
 ]
