@@ -26,11 +26,15 @@
                     <td><a href="/store/goods/{{ goods.id }}/">{{ goods.goods_name }}</a></td>
                     <td>{{ goods.goods_price }}</td>
                     <td>{{ goods.goods_number }}</td>
+                    <td>{{ goods.goods_date }}</td>
                     <td>{{ goods.goods_safeDate }}</td>
-                    <td>{{ goods.goods_name }}</td>
                     <td>
-                        <a href="#" class="btn btn-warning">下架</a>
-                        <a href="#" class="btn btn-success">销毁</a>
+                        {% if state_num == 1 %}
+                        <a href="/store/set_goods/down/?id={{ goods.id }}" class="btn btn-warning">下架</a>
+                        {% else %}
+                        <a href="/store/set_goods/up/?id={{ goods.id }}" class="btn btn-warning">上架</a>
+                        {% endif %}
+                        <a href="/store/set_goods/delete/?id={{ goods.id }}" class="btn btn-success">销毁</a>
                     </td>
                 </tr>
 

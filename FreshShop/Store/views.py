@@ -15,12 +15,14 @@ def set_password(password):
     md5.update(password.encode())
     return md5.hexdigest()
 
-def UserVaild(func):
+def UserVaild(func): #设置装饰器，进行校验cookie和session
     def inner(request,*args,**kwargs):
         u_cookies = request.COOKIES.get('username')
         u_session = request.session.get('username')
         if u_cookies and u_session and u_cookies == u_session:
-            return func(request,*args,**kwargs)
+            user = Seller.objects.filter(username=u_cookies).first()
+            if user:
+                return func(request,*args,**kwargs)
     return inner
 
 def register(request):
@@ -91,12 +93,14 @@ def index(request):
 #退出
 def logout(request):
     response = HttpResponseRedirect('/store/login/')
-    response.delete_cookie('username')
+    for key in request.COOKIES: #获取当前浏览器的所有cookie
+        response.delete_cookie(key)        #下发删除cookie的请求，删除浏览器端的所有cookie
+    # response.delete_cookie('username')
     return response
-
 
 def base(request):
     return render(request,'store/base.html')
+
 
 def register_store(request):
     type_list = StoreType.objects.all()
@@ -109,8 +113,6 @@ def register_store(request):
         store_phone = post_data.get('store_phone')
         store_money = post_data.get('store_money')
         store_address =  post_data.get('store_address')
-
-
 
         type_lists = post_data.getlist('type') #获取到所有类型,getlist
         store_logo = request.FILES.get('store_logo')  #获取图片request.FILES.get('store_logo')
@@ -167,8 +169,25 @@ def add_goods(request):
         return HttpResponseRedirect('/store/list_goods/')
     return render(request,'store/add_goods.html')
 
-def list_goods(request):
-    #获取两个关键字
+#商品列表
+def list_goods(request,state):
+    """
+    base页中添加/store/list_goods/up/，或/store/list_goods/down/的href来请求url，
+    url截取请求，截取出state，判断是请求上架列表（up）,还是下架列表（down）,然后根据请求
+    把数据返回页面。如果是请求上架页，把1赋给状态state_num，如果是请求下架页，把0赋给状态state_num。
+    good_under字段表示上下架，把state_num参数赋给字段来执行查询，查询上架的商品，或者下架的商品。
+    :param request:
+    :param state:
+    :return:
+    """
+
+    #如果是请求
+    if state == 'up':
+        state_num = 1
+    else:
+        state_num = 0
+
+    #获取两个关键字，一个决定查询内容，一个决定查询页数
     keywords = request.GET.get('keywords','')
     page_num = request.GET.get('page_num',1) #获取前台传来的页数，没有的话就默认是第一页
 
@@ -178,9 +197,9 @@ def list_goods(request):
 
     if keywords:
         #获取店铺对应的全部商品,反向查询
-        goods_list = store.goods_set.filter(goods_name__contains=keywords)#模糊查询，字段__contains=关键字
+        goods_list = store.goods_set.filter(goods_name__contains=keywords,good_under=state_num)#模糊查询，字段__contains=关键字
     else:
-        goods_list = store.goods_set.all()
+        goods_list = store.goods_set.filter(goods_under=state_num)
     paginator = Paginator(goods_list,3)
     page = paginator.page(int(page_num))
     page_range = paginator.page_range
@@ -218,6 +237,53 @@ def update_goods(request,goods_id):
 
 
     return render(request,'store/update_goods.html',locals())
+
+#商品下架
+# def under_goods(request):
+#     """
+#     获取商品id，是为了对商品修改
+#     获取referer来源是为了修改完成之后重定向到来源页
+#     :param request:
+#     :return:
+#     """
+#     id = request.GET.get('id') #获取前台href中传来的get，获取get中携带的商品id
+#     referer = request.META.get('HTTP_REFERER') #获取商品来源的网页，删除完成后再重定向到来源页
+#     if id: #判断是否获取到商品id
+#         goods = Goods.objects.filter(id=id).first() #获取商品
+#         goods.goods_under = 0  #修改商品上架状态1 为下架状态0
+#         goods.save()           #保存商品数据
+#     return HttpResponseRedirect(referer)  #重定向到来源页
+
+def set_goods(request,state):
+    if state == "down":
+        state_num = 0
+    else:
+        state_num = 1
+
+    id = request.GET.get('id')
+    referer = request.META.get('HTTP_REFERER')
+    if id:
+        goods = Goods.objects.filter(id=id).first()
+        if state == 'delete':
+            goods.delete()
+        else:
+            goods.goods_under = state_num
+            goods.save()
+    return HttpResponseRedirect(referer)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 #密码加密
@@ -300,7 +366,7 @@ def update_goods(request,goods_id):
 #
 # def register_store(request):
 #     type_list = StoreType.objects.all()
-#
+#     user_id = request.COOKIES.get('user_id')
 #     if request.method == "POST":
 #         post_data = request.POST
 #         store_name = post_data.get('store_name')
@@ -311,7 +377,73 @@ def update_goods(request,goods_id):
 #
 #         type_lists = post_data.getlist('type')
 #         store_logo = post_data.FILES.get('store_logo')
-#     return render(request,'store/register_store.html')
+#
+#         store = Store()
+#         store.store_name = store_name
+#         store.store_descripton = store_descripton
+#         store.store_phone = store_phone
+#         store.store_money = store_money
+#         store.store_address = store_address
+#         store.store_logo = store_logo
+#         store.user_id = user_id
+#         store.save()
+#
+#         for i in type_list:
+#             store_type = StoreType.objects.get(id = i)
+#             store.type.add(store_type)
+#         store.save()
+#
+#         response = HttpResponseRedirect('/store/index/')
+#         response.set_cookie('has_store',store.id)
+#         return response
+#     return render(request,'store/register_store.html',locals())
+#
+# #添加商品
+# def add_goods(request):
+#     if request.method == "POST":
+#         goods = request.POST
+#         goods_name = goods.get('goods_name')
+#         goods_price = goods.get('goods_price')
+#         goods_number = goods.get('goods_number')
+#         goods_description = goods.get('goods_description')
+#         goods_date = goods.get('goods_date')
+#         goods_safeDate = goods.get('goods_safeDate')
+#         goods_store = goods.get('goods_store')
+#         goods_image = goods.get('goods_image')
+#
+#         #保存数据
+#         goods = Goods()
+#         goods.goods_name = goods_name
+#         goods.goods_price = goods_price
+#         goods.goods_number = goods_number
+#         goods.goods_description = goods_description
+#         goods.goods_date = goods_date
+#         goods.goods_safeDate =goods_safeDate
+#         goods.goods_store = goods_store
+#         goods.goods_image = goods_image
+#         goods.save()
+#
+#         #关联到用户
+#         goods.store_id.add(
+#             Store.objects.get(user_id=goods_store)
+#         )
+#         goods.save()
+#         return HttpResponseRedirect('/store/list_goods/')
+#     return render(request,'store/add_goods.html',locals())
+#
+# def list_goods(request):
+#     page = Goods.objects.all()
+#     keyword = request.GET.get('keywords','')
+#
+#     store = Store.objects.get('has_store')
+#     if keyword:
+#         goods_list = store.goods_set.filter()
+#     p = request.GET.get('page_num',1)
+#     paginator = Paginator(page,3)
+#     page = paginator.page(int(p))
+#     page_range = paginator.page_range
+#
+#     return render(request,'store/goods_list.html',locals())
 
 
 
