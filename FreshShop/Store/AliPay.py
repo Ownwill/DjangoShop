@@ -20,7 +20,7 @@ alipay = AliPay(
 
 #发起支付请求
 order_string = alipay.api_alipay_trade_page_pay(
-    out_trade_no = "12",#订单号
+    out_trade_no = "14",#订单号
     total_amount=str(1000.01), #支付金额
     subject = '生鲜交易', #交易主体
     return_url=None,

@@ -8,8 +8,11 @@ urlpatterns = [
     path('register/', register),
     path('index/', index),
     path('goods_list/',goods_list),
+
 ]
 
 urlpatterns +=[
     path('base/',base),
+    path('order_pay/',order_pay),
+    path('pay_result/',pay_result),
 ]
