@@ -26,7 +26,8 @@
                     <td style="text-align: center;">
                         <a class="btn btn-danger" href="/store/delete_goods_type/?id={{ goods_type.id }}">删除</a>
                         <a class="btn btn-warning" data-toggle="modal" data-target="#myModal{{ goods_type.id }}">修改</a>
-                            <!--保存商品类型模态框-->
+
+                        <!--保存商品类型模态框-->
                         <div class="modal fade" id="myModal{{ goods_type.id }}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
@@ -34,7 +35,7 @@
                                     <h4 class="modal-title" id="myModalLabel">修改商品类型</h4>
                                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                                 </div>
-                                <form method="post" class="form" action="/store/update_good_type/">
+                                <form method="post" class="form" action="/store/update_good_type/" enctype="multipart/form-data">
                                     <div class="modal-body">
                                         {% csrf_token %}
                                         <div class="form-group">
@@ -44,6 +45,7 @@
                                             <input class="form-control form-control-user " placeholder="" type="text" name="description" value="{{ goods_type.description }}">
                                         </div>
                                         <div class="form-group">
+                                            <img src="/static/{{ goods_type.picture }}" alt="" style="width:400px;height:300px;">
                                             <input class="form-control form-control-user" placeholder="" type="file" name="picture">
                                         </div>
                                         <div class="form-group">
@@ -58,12 +60,48 @@
                             </div><!-- /.modal-content -->
                         </div><!-- /.modal -->
                     </div>
+                        <!--保存商品类型模态框结束-->
+
+
 
 
                     </td>
                 </tr>
             {% endfor %}
         </tbody>
+
+                            <!--添加商品类型模态框-->
+                        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title" id="myModalLabel">添加商品类型</h4>
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                </div>
+                                <form method="post" class="form" enctype="multipart/form-data">
+                                    <div class="modal-body">
+                                        {% csrf_token %}
+                                        <div class="form-group">
+                                            <input class="form-control form-control-user" placeholder="类型名称" type="text" name="name">
+                                        </div>
+                                        <div class="form-group">
+                                            <input class="form-control form-control-user " placeholder="类型描述" type="text" name="description">
+                                        </div>
+                                        <div class="form-group">
+
+                                            <input class="form-control form-control-user" placeholder="类型图片" type="file" name="picture">
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-primary">保存类型</button>
+                                    </div>
+                                </form>
+                            </div><!-- /.modal-content -->
+                        </div><!-- /.modal -->
+                    </div>
+                        <!--添加商品类型模态框结束-->
+
+
     </table>
     <div class="dataTables_paginate paging_simple_numbers">
         <ul class="pagination">
@@ -76,34 +114,6 @@
     </div>
 
 
-    <!--添加商品类型模态框-->
-    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title" id="myModalLabel">添加商品类型</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-            </div>
-            <form method="post" class="form">
-                <div class="modal-body">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <input class="form-control form-control-user" placeholder="类型名称" type="text" name="name">
-                    </div>
-                    <div class="form-group">
-                        <input class="form-control form-control-user " placeholder="类型描述" type="text" name="description">
-                    </div>
-                    <div class="form-group">
-                        <input class="form-control form-control-user" placeholder="类型图片" type="file" name="picture">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">保存类型</button>
-                </div>
-            </form>
-        </div><!-- /.modal-content -->
-    </div><!-- /.modal -->
-</div>
 {% endblock %}
 
 

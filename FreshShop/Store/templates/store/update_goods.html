@@ -20,6 +20,15 @@
 
                 <input type="text" name="goods_name" value="{{ goods_data.goods_name }}">
             </td>
+            <th>商品类型</th>
+            <td>
+                <select name="type" class="form-control form-control-user">
+                    {% for t in goods_type %}
+                    <option value="{{ t.id }}">{{ t.name }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+
         </tr>
 
         <tr>
@@ -44,7 +53,9 @@
                 <input type="text" name="goods_safeDate" value="{{ goods_data.goods_safeDate }}">
 
             </td>
+
         </tr>
+
         <tr>
             <th colspan="10" style="text-align: center;">商品描述</th>
         </tr>

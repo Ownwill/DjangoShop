@@ -52,11 +52,42 @@ def login(request):
 
 @UserVaild
 def index(request):
-    good_type_list = GoodType.objects.all()
-    print(good_type_list)
-    # goods = good_type_list.goods_set.all()
-    # print(goods)
+    """
+    前台首页
+    :param request:
+    :return:
+    """
+    result_list = []
+    goods_type_list = GoodType.objects.all()
+    print(goods_type_list)
+    for goods_type in goods_type_list:
+        goods_list = goods_type.goods_set.values()[:4]
+        if goods_list:
+            goods_type = {
+                'id':goods_type.id,#配置商品id，在点击更多的时候使用类型id，跳转到更多页面
+                'name':goods_type.name,
+                'description':goods_type.description,
+                'picture':goods_type.picture,
+                'goods_list':goods_list,
+            }
+            result_list.append(goods_type)
+
     return render(request,'buyer/index.html',locals())
+
+#点击更多之后，跳转到的更多商品页
+def goods_list(request):
+    """
+    前台列表页
+    :param reuqest:
+    :return:
+    """
+    goodsList = []
+    type_id = request.GET.get('type_id') #获取index页面传来的商品类型
+    print(type_id)
+    goods_type = GoodType.objects.filter(id = type_id).first() #从商品类型表查找出商品类型
+    if goods_type:#判断商品类型是否为空
+        goodsList = goods_type.goods_set.filter(goods_under = 1) #查询
+    return render(request,'buyer/goods_list.html',locals())
 
 def logout(request):
     response = HttpResponseRedirect('/buyer/index/')

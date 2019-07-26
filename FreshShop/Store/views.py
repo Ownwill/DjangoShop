@@ -151,6 +151,7 @@ def add_goods(request):
         goods_store = request.POST.get('goods_store')
         goods_image = request.FILES.get('goods_image')
         goods_type_id = request.POST.get('type') #获取到所有类型,getlist
+
         #开始保存数据
         goods = Goods()
         goods.goods_name = goods_name
@@ -281,7 +282,8 @@ def goods_type(request):
     if request.method == "POST":
         name = request.POST.get('name')
         description = request.POST.get('description')
-        picture = request.POST.get('picture')
+        picture = request.FILES.get('picture')
+        print(picture)
         goods_type = GoodType()
         goods_type.name = name
         goods_type.description = description
