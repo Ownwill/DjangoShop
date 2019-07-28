@@ -9,6 +9,7 @@ urlpatterns = [
     path('index/', index),
     path('goods_list/',goods_list),
     path('detail/',detail),
+    path('goods_num_ajax/',goods_num_ajax ),
 
 ]
 

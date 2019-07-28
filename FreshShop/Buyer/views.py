@@ -1,6 +1,9 @@
 from django.shortcuts import render
-from django.http import HttpResponseRedirect,HttpResponse
 from django.core.paginator import Paginator
+from django.http import HttpResponse
+from django.http import HttpResponseRedirect
+from django.http import JsonResponse
+
 
 from Buyer.models import *
 from Store.views import set_password
@@ -102,13 +105,61 @@ def goods_list(request):
 def detail(request):
     goods_id = request.GET.get('id')
     goods = Goods.objects.filter(id = int(goods_id)).first()
-    print('*'*50,goods.goods_name)
     goods_name =  goods.goods_name
     goods_price = goods.goods_price
     goods_number = goods.goods_number
     goods_description = goods.goods_description
     goods_image = goods.goods_image
+    goods_count = 0 #前台显示的商品数量
     return render(request,'buyer/detail.html',locals())
+#增加减少商品数量
+def goods_num_ajax(request):
+    result = {'status':'error'}  #ajax返回的结果
+
+    goods_count = int(request.GET.get('goods_count'))
+    goods_id = request.GET.get('id')
+    meth = request.GET.get('meth')
+    goods = Goods.objects.filter(id=goods_id).first()  # 查询出对应的商品
+    #点击添加的时候的方法
+    if meth == 'add':
+        # 如果数据库中商品数量大于0，前端显示的数量加一，数据库中的数据减一
+        if goods.goods_number>0:#如果数据库中的商品大于0则可以往下减
+            goods_count = goods_count + 1  # 前端显示的数量
+            goods.goods_number = int(goods.goods_number)-1  #数据库中的商品减一
+            # ajax返回的数据
+            result['status'] = 'success'
+            result['goods_count'] = goods_count
+            print('$' * 50, result)
+            goods.save()
+            return JsonResponse(result)
+        # 如果数据库中商品数量不大于0，前端显示的数量为0，数据库中的数据不减
+        else:
+            result['status'] = 'success'
+            result['goods_count'] = goods_count
+            print('@' * 50, result)
+            return JsonResponse(result)
+
+    #点击减少时的操作
+    if meth == 'sub':
+        # 如果前端商品数量大于0，前端显示的数量减一，数据库中的数据加一
+        if goods_count>0:#如果数据库中的商品大于0则可以往下减
+            goods_count = goods_count - 1  # 前端显示的数量
+            goods.goods_number = int(goods.goods_number)+1  #数据库中的商品减一
+            # ajax返回的数据
+            result['status'] = 'success'
+            result['goods_count'] = goods_count
+            print('$' * 50, result)
+            goods.save()
+            return JsonResponse(result)
+        # 如果前端商品数量不大于0，前端显示的数量为0，数据库中的数据不变
+        else:
+            result['status'] = 'success'
+            result['goods_count'] = 0
+            print('@' * 50, result)
+            return JsonResponse(result)
+
+
+    return HttpResponse()
 
 def logout(request):
     response = HttpResponseRedirect('/buyer/index/')

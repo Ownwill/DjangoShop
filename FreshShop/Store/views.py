@@ -240,7 +240,6 @@ def update_goods(request,goods_id):
         goods.save()
         return HttpResponseRedirect('/store/goods/%s/'%goods_id)
 
-
     return render(request,'store/update_goods.html',locals())
 
 #商品下架

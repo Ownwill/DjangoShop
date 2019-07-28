@@ -4,6 +4,10 @@
     商品详情页
 {% endblock %}
 
+{% block style %}
+    <script src="/static/buyer/js/jquery-1.12.4.min.js"></script>
+{% endblock %}
+
 {% block content %}
 	<div class="breadcrumb">
 		<a href="#">全部分类</a>
@@ -26,9 +30,9 @@
 			<div class="goods_num clearfix">
 				<div class="num_name fl">数 量：</div>
 				<div class="num_add fl">
-					<input type="text" class="num_show fl" value="1">
-					<a href="javascript:;" class="add fr">+</a>
-					<a href="javascript:;" class="minus fr">-</a>	
+					<input type="text" id="goods_count" class="num_show fl" value="{{ goods_count }}">
+					<a href="#" id="add" class="add fr">+</a>
+					<a href="#" id="sub" class="minus fr">-</a>
 				</div> 
 			</div>
 			<div class="total">总价：<em>16.80元</em></div>
@@ -76,7 +80,51 @@
 {% endblock %}
 
 {% block script %}
+    <script>
+    $('#add').click(
+            function () {
+                var goods_count = $('#goods_count').val();
+                var url = "/buyer/goods_num_ajax/?id={{ goods_id }}&meth=add&goods_count="+goods_count;
+                $.ajax(
+                    {
+                        url:url,
+                        type:"get",
+                        data:"",
+                        success:function (data) {
+                            var goods_count = data.goods_count;
+                            document.getElementById("goods_count").value=goods_count;
 
+                        },
+                        error:function(error){
+                            console.log(error)
+                        }
+                    }
+                )
+            }
+        )
+
+    $('#sub').click(
+        function () {
+            var goods_count = $('#goods_count').val();
+            var url = "/buyer/goods_num_ajax/?id={{ goods_id }}&meth=sub&goods_count="+goods_count;
+            $.ajax(
+                {
+                    url:url,
+                    type:"get",
+                    data:"",
+                    success:function (data) {
+                        var goods_count = data.goods_count;
+                        document.getElementById("goods_count").value=goods_count;
+                    },
+                    error:function(error){
+                        console.log(error)
+                    }
+                }
+            )
+        }
+    )
+
+    </script>
 
 {#	<script type="text/javascript" src="/static/buyer/js/jquery-1.12.2.js"></script>#}
 {#	<script type="text/javascript">#}
