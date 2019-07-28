@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect,HttpResponse
+from django.core.paginator import Paginator
 
 from Buyer.models import *
 from Store.views import set_password
@@ -86,11 +87,28 @@ def goods_list(request):
     """
     goodsList = []
     type_id = request.GET.get('type_id') #获取index页面传来的商品类型
-    print(type_id)
+    page_num = int(request.GET.get('page_num',1)) #获取前端传来的页码
     goods_type = GoodType.objects.filter(id = type_id).first() #从商品类型表查找出商品类型
+
     if goods_type:#判断商品类型是否为空
         goodsList = goods_type.goods_set.filter(goods_under = 1) #查询
+    paginator = Paginator(goodsList,2)
+    page = paginator.page(page_num)
+    page_range = paginator.page_range
+    # print(page_range)
     return render(request,'buyer/goods_list.html',locals())
+
+#商品详情页
+def detail(request):
+    goods_id = request.GET.get('id')
+    goods = Goods.objects.filter(id = int(goods_id)).first()
+    print('*'*50,goods.goods_name)
+    goods_name =  goods.goods_name
+    goods_price = goods.goods_price
+    goods_number = goods.goods_number
+    goods_description = goods.goods_description
+    goods_image = goods.goods_image
+    return render(request,'buyer/detail.html',locals())
 
 def logout(request):
     response = HttpResponseRedirect('/buyer/index/')
@@ -163,3 +181,4 @@ def order_pay(request):
     )  # 生成url后面的参数
     # print('https://openapi.alipaydev.com/gateway.do?' + order_string)  # 跳转的支付页面url：'https://openapi.alipaydev.com/gateway.do?'+order_string。
     return HttpResponseRedirect('https://openapi.alipaydev.com/gateway.do?' + order_string)
+

@@ -5,6 +5,12 @@
 {% endblock %}
 
 {% block content %}
+    <div class="breadcrumb">
+		<a href="#">全部分类</a>
+		<span>></span>
+		<a href="#">新鲜水果</a>
+	</div>
+
 	<div class="main_wrap clearfix">
 		<div class="l_wrap fl clearfix">
 			<div class="new_goods">
@@ -32,13 +38,13 @@
 			</div>
 
 			<ul class="goods_type_list clearfix">
-                {% for good in goodsList %}
+                {% for goods in page %}
 				    <li>
-				    	<a href="detail.html"><img src="/static/buyer/images/goods/goods003.jpg"></a>
-				    	<h4><a href="detail.html">大兴大棚草莓</a></h4>
+				    	<a href="/buyer/detail/?id={{ goods.id }}"><img src="/static/{{ goods.goods_image }}"></a>
+				    	<h4><a href="detail.html">{{ goods.goods_name }}</a></h4>
 				    	<div class="operate">
-				    		<span class="prize">￥16.80</span>
-				    		<span class="unit">16.80/500g</span>
+				    		<span class="prize">￥{{ goods.goods_price }}</span>
+				    		<span class="unit">{{ goods.goods_price }}/500g</span>
 				    		<a href="#" class="add_goods" title="加入购物车"></a>
 				    	</div>
 				    </li>
@@ -47,12 +53,10 @@
 			</ul>
 
 			<div class="pagenation">
-				<a href="#"><上一页</a>
-				<a href="#" class="active">1</a>
-				<a href="#">2</a>
-				<a href="#">3</a>
-				<a href="#">4</a>
-				<a href="#">5</a>
+{#                <a href="#"><上一页</a>#}
+                {% for p in page_range %}
+				    <a href="/buyer/goods_list/?type_id={{ goods_type.id }}&page_num={{ p }}" class="active">{{ p }}</a>
+                {% endfor %}
 				<a href="#">下一页></a>
 			</div>
 		</div>

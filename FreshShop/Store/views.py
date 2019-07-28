@@ -205,6 +205,7 @@ def list_goods(request,state):
         print(keywords)
         goods_list = store.goods_set.filter(goods_under=state_num)
     paginator = Paginator(goods_list,3)
+
     page = paginator.page(int(page_num))
     page_range = paginator.page_range
     return render(request,'store/goods_list.html',locals())

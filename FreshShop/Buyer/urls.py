@@ -8,6 +8,7 @@ urlpatterns = [
     path('register/', register),
     path('index/', index),
     path('goods_list/',goods_list),
+    path('detail/',detail),
 
 ]
 
