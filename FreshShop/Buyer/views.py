@@ -129,6 +129,7 @@ def goods_num_ajax(request):
             # ajax返回的数据
             result['status'] = 'success'
             result['goods_count'] = goods_count
+            result['total_money'] = goods_count*int(goods.goods_price)
             print('$' * 50, result)
             goods.save()
             return JsonResponse(result)
@@ -148,6 +149,8 @@ def goods_num_ajax(request):
             # ajax返回的数据
             result['status'] = 'success'
             result['goods_count'] = goods_count
+            result['total_money'] = goods_count*int(goods.goods_price)
+
             print('$' * 50, result)
             goods.save()
             return JsonResponse(result)

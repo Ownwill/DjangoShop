@@ -6,6 +6,8 @@
 
 {% block style %}
     <script src="/static/buyer/js/jquery-1.12.4.min.js"></script>
+    <script src="/static/buyer/js/vue-resource.js"></script>
+    <script src="/static/buyer/js/vue.min.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -20,7 +22,7 @@
 	<div class="goods_detail_con clearfix">
 		<div class="goods_detail_pic fl"><img src="/static/{{ goods_image }}" style="width: 360px;height: 360px;"></div>
 
-		<div class="goods_detail_list fr">
+		<div class="goods_detail_list fr" id="goods_detail_list">
 			<h3>{{ goods_name }}</h3>
 			<p>{{ goods_description }}</p>
 			<div class="prize_bar">
@@ -35,7 +37,7 @@
 					<a href="#" id="sub" class="minus fr">-</a>
 				</div> 
 			</div>
-			<div class="total">总价：<em>16.80元</em></div>
+			<div class="total">总价：<em id="total_money">{{ total_money }}</em>元</div>
 			<div class="operate_btn">
 				<a href="javascript:;" class="buy_btn">立即购买</a>
 				<a href="javascript:;" class="add_cart" id="add_cart">加入购物车</a>				
@@ -92,7 +94,9 @@
                         data:"",
                         success:function (data) {
                             var goods_count = data.goods_count;
+                            var total=data.total_money;
                             document.getElementById("goods_count").value=goods_count;
+                            $("#total_money").html(total);
 
                         },
                         error:function(error){
@@ -114,8 +118,11 @@
                     data:"",
                     success:function (data) {
                         var goods_count = data.goods_count;
+                        var total=data.total_money;
                         document.getElementById("goods_count").value=goods_count;
-                    },
+                        $("#total_money").html(total);
+
+                        },
                     error:function(error){
                         console.log(error)
                     }
