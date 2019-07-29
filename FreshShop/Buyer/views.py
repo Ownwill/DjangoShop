@@ -1,3 +1,5 @@
+import time
+
 from django.shortcuts import render
 from django.core.paginator import Paginator
 from django.http import HttpResponse
@@ -95,7 +97,7 @@ def goods_list(request):
 
     if goods_type:#判断商品类型是否为空
         goodsList = goods_type.goods_set.filter(goods_under = 1) #查询
-    paginator = Paginator(goodsList,2)
+    paginator = Paginator(goodsList,4)
     page = paginator.page(page_num)
     page_range = paginator.page_range
     # print(page_range)
@@ -104,65 +106,127 @@ def goods_list(request):
 #商品详情页
 def detail(request):
     goods_id = request.GET.get('id')
-    goods = Goods.objects.filter(id = int(goods_id)).first()
-    goods_name =  goods.goods_name
-    goods_price = goods.goods_price
-    goods_number = goods.goods_number
-    goods_description = goods.goods_description
-    goods_image = goods.goods_image
-    goods_count = 0 #前台显示的商品数量
-    return render(request,'buyer/detail.html',locals())
+    if goods_id:
+        goods = Goods.objects.filter(id = int(goods_id)).first()
+        if goods:
+            goods_name =  goods.goods_name
+            goods_price = goods.goods_price
+            goods_number = goods.goods_number
+            goods_description = goods.goods_description
+            goods_image = goods.goods_image
+            goods_count = 0 #前台显示的商品数量
+            return render(request,'buyer/detail.html',locals())
+    return HttpResponse('没有您查找的商品')
+
+def setOrder_id(user_id,goods_id,store_id):
+    """
+    设置商品订单编号
+    时间+用户id+商品id+店铺id
+    :return:
+    """
+    strtime = time.strftime('%Y%m%d%H%M%S',time.localtime())
+    return strtime+user_id+goods_id+store_id
+
+def place_order(request):
+
+    #获取detail页面通过form表单传来的数据
+    if request.method == "POST":
+        count = int(request.POST.get('count'))    #获取到用户选择购买商品的数量
+        goods_id = request.POST.get('goods_id')   #获取到用户购买商品的id
+        user_id = int(request.COOKIES.get('user_id'))  #获取到用户的id
+        goods = Goods.objects.get(id=goods_id)         #查找到goods表对应的商品
+        store_id = goods.store_id.id        #查找到商品对应的商店，商品和商店是多对一关系
+
+        #保存订单表
+        order = Order()
+        order.order_id = setOrder_id(str(user_id),str(goods_id),str(store_id)) #订单号
+        order.goods_count = count                                              #订单数量
+        order.order_user = Buyer.objects.get(id=user_id)                       #订单用户
+        order.order_price = count*goods.goods_price                            #订货总价
+        order.order_status = 1
+        order.save()
+
+        #保存订单详情表
+        order_detail = OrderDetail()
+        order_detail.order_id = order                      #对应的订单表，订单详情表和订单表是一对多关系
+        order_detail.goods_id = goods_id                   #商品id
+        order_detail.goods_name = goods.goods_name         #商品名称
+        order_detail.goods_price = goods.goods_price       #商品价格
+        order_detail.goods_number = count                  #商品数量
+        order_detail.goods_total = count*goods.goods_price #商品总价
+        order_detail.goods_store = store_id                #对应店铺的id
+        order_detail.goods_image = goods.goods_image       #商品图片
+        order_detail.save()
+
+        detail = [order_detail]                            #把商品详情保存在列表里
+        return render(request,'buyer/place_order.html',locals())
+    else:
+        return HttpResponse('非法请求')
+
 #增加减少商品数量
-def goods_num_ajax(request):
-    result = {'status':'error'}  #ajax返回的结果
-
-    goods_count = int(request.GET.get('goods_count'))
-    goods_id = request.GET.get('id')
-    meth = request.GET.get('meth')
-    goods = Goods.objects.filter(id=goods_id).first()  # 查询出对应的商品
-    #点击添加的时候的方法
-    if meth == 'add':
-        # 如果数据库中商品数量大于0，前端显示的数量加一，数据库中的数据减一
-        if goods.goods_number>0:#如果数据库中的商品大于0则可以往下减
-            goods_count = goods_count + 1  # 前端显示的数量
-            goods.goods_number = int(goods.goods_number)-1  #数据库中的商品减一
-            # ajax返回的数据
-            result['status'] = 'success'
-            result['goods_count'] = goods_count
-            result['total_money'] = goods_count*int(goods.goods_price)
-            print('$' * 50, result)
-            goods.save()
-            return JsonResponse(result)
-        # 如果数据库中商品数量不大于0，前端显示的数量为0，数据库中的数据不减
-        else:
-            result['status'] = 'success'
-            result['goods_count'] = goods_count
-            print('@' * 50, result)
-            return JsonResponse(result)
-
-    #点击减少时的操作
-    if meth == 'sub':
-        # 如果前端商品数量大于0，前端显示的数量减一，数据库中的数据加一
-        if goods_count>0:#如果数据库中的商品大于0则可以往下减
-            goods_count = goods_count - 1  # 前端显示的数量
-            goods.goods_number = int(goods.goods_number)+1  #数据库中的商品减一
-            # ajax返回的数据
-            result['status'] = 'success'
-            result['goods_count'] = goods_count
-            result['total_money'] = goods_count*int(goods.goods_price)
-
-            print('$' * 50, result)
-            goods.save()
-            return JsonResponse(result)
-        # 如果前端商品数量不大于0，前端显示的数量为0，数据库中的数据不变
-        else:
-            result['status'] = 'success'
-            result['goods_count'] = 0
-            print('@' * 50, result)
-            return JsonResponse(result)
-
-
-    return HttpResponse()
+# def goods_num_ajax(request):
+#     result = {'status':'error'}  #ajax返回的结果
+#
+#     goods_count = int(request.GET.get('goods_count'))
+#     goods_id = request.GET.get('id')
+#     meth = request.GET.get('meth')
+#     goods = Goods.objects.filter(id=goods_id).first()  # 查询出对应的商品
+#     #点击添加的时候的方法
+#     if meth == 'add':
+#         # 如果数据库中商品数量大于0，前端显示的数量加一，数据库中的数据减一
+#         if goods.goods_number>0:#如果数据库中的商品大于0则可以往下减
+#             goods_count = goods_count + 1  # 前端显示的数量
+#             goods.goods_number = int(goods.goods_number)-1  #数据库中的商品减一
+#             # ajax返回的数据
+#             result['status'] = 'success'
+#             result['goods_count'] = goods_count
+#             result['total_money'] = goods_count*int(goods.goods_price)
+#             goods.save()
+#             return JsonResponse(result)
+#         # 如果数据库中商品数量不大于0，前端显示的数量为0，数据库中的数据不减
+#         else:
+#             result['status'] = 'success'
+#             result['goods_count'] = goods_count
+#             return JsonResponse(result)
+#
+#     #点击减少时的操作
+#     if meth == 'sub':
+#         # 如果前端商品数量大于0，前端显示的数量减一，数据库中的数据加一
+#         if goods_count>0:#如果数据库中的商品大于0则可以往下减
+#             goods_count = goods_count - 1  # 前端显示的数量
+#             goods.goods_number = int(goods.goods_number)+1  #数据库中的商品减一
+#             # ajax返回的数据
+#             result['status'] = 'success'
+#             result['goods_count'] = goods_count
+#             result['total_money'] = goods_count*int(goods.goods_price)
+#
+#             print('$' * 50, result)
+#             goods.save()
+#             return JsonResponse(result)
+#         # 如果前端商品数量不大于0，前端显示的数量为0，数据库中的数据不变
+#         else:
+#             result['status'] = 'success'
+#             result['goods_count'] = 0
+#             print('@' * 50, result)
+#             return JsonResponse(result)
+#
+#
+#     return HttpResponse()
+#
+# #加入购物车
+# def add_cart(request):
+#     goods_id = int(request.GET.get('id')) #获取商品的id
+#     goods_num = request.GET.get('goods_num')
+#     print(goods_num)
+#     goods = Goods.objects.filter(id=goods_id).first()
+#     cart = Cart()
+#     cart.goods_id = goods.id
+#     cart.goods_name = goods.goods_name
+#     cart.goods_price = goods.goods_price
+#     cart.goods_picture = goods.goods_image
+#     cart.goods_num = goods_num
+#     print(goods)
+#     return  HttpResponse('nice')
 
 def logout(request):
     response = HttpResponseRedirect('/buyer/index/')
@@ -203,10 +267,10 @@ def pay_result(request):
     return render(request,'buyer/pay_result.html',locals())
     # return HttpResponse('你好')
 
-#支付包支付
+#支付宝支付
 def order_pay(request):
     money = request.GET.get('money')
-    order_id = request.GET.get('id')
+    order_id = request.GET.get('order_id')
 
     alipay_public_key_string = '''-----BEGIN PUBLIC KEY-----
     MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqYWv+ilxLUZ0Ta+HnxiDa2oSbqVLSu0Tn256MBOv3lsSo0Ea4NM/VgCkWZT0nP38VoJYoRdBzJAFRFN+prCBJKNCwgT3KuzmYcg+41Ymv/WDatw4BNMEkL9fHG3fMAIN/jKhkQy1y/Mp4Rl3ZXX1V6AnM2VTJjSxrGu00Am83R2ljnL3KTSynFekOkqoVISN6UEmfnG2NuyCsbrzFotTogyr5bf+dt8jA+sDL4EiJ6y18pkGiSQKymoIkAY28UhZ3wuhoHemwiLoywk2VEloof8mn3WugeHriNyfy54sA5Tfrau/CAiJ2FGQhQtQznIAiIG+pQmzyQoNAK0PDr2B4wIDAQAB
@@ -234,5 +298,10 @@ def order_pay(request):
         notify_url='http://127.0.0.1:8000/buyer/pay_result/',    #支付成功后跳转的异步路由，可以用ajax来完善
     )  # 生成url后面的参数
     # print('https://openapi.alipaydev.com/gateway.do?' + order_string)  # 跳转的支付页面url：'https://openapi.alipaydev.com/gateway.do?'+order_string。
+
+    order = Order.objects.get(order_id=order_id)
+    order.order_status = 2
+    order.save()   #保存商品订单
+
     return HttpResponseRedirect('https://openapi.alipaydev.com/gateway.do?' + order_string)
 

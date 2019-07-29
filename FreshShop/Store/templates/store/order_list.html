@@ -1,0 +1,48 @@
+{% extends 'store/base.html' %}
+
+{% block title %}
+    订单列表页
+{% endblock %}
+
+{% block container %}
+    <table class="table">
+        <thead class="table-info">
+        <tr>
+            <th>订单编号</th>
+            <th>订单商品</th>
+            <th>订单金额</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody class="table-active">
+            {% for order in order_list %}
+                <tr>
+                    <td><a href="#">{{ order.order_id.order_id }}</a></td>
+                    <td>{{ order.goods_name }}</td>
+                    <td>{{ order.goods_total }}</td>
+                    <td>
+                        {% if operate == 'pending' %}
+                        <a href="/store/order_confirm/?id={{ order.id }}" class="btn btn-warning">确认发货</a>
+                        <a href="/store/order_refuse/?id={{ order.id }}&oper=refuse" class="btn btn-warning">拒绝发货</a>
+
+                        {% elif operate == 'solved' %}
+                        <a href="/store/order_refuse/?id={{ order.id }}&oper=delete" class="btn btn-warning">删除商品</a>
+                        {% endif %}
+                    </td>
+
+                </tr>
+
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="dataTables_paginate paging_simple_numbers">
+        <ul class="pagination">
+            {% for p in page_range %}
+                <li class="paginate_button page-item">
+                    <a class="page-link" href="?keywords={{ keywords }}&page_num={{ p }}">{{ p }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+{% endblock %}

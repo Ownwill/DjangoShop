@@ -9,8 +9,9 @@ urlpatterns = [
     path('index/', index),
     path('goods_list/',goods_list),
     path('detail/',detail),
-    path('goods_num_ajax/',goods_num_ajax ),
-
+    # path('goods_num_ajax/',goods_num_ajax ),
+    # path('add_cart/',add_cart),
+    path('place_order/',place_order),
 ]
 
 urlpatterns +=[

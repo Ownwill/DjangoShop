@@ -1,11 +1,13 @@
 import hashlib
 
 from django.shortcuts import render
+from django.shortcuts import redirect
 from django.http import HttpResponse
 from django.core.paginator import Paginator #引入分页
 from django.http import HttpResponseRedirect
 
 from Store.models import *
+from Buyer.models import *
 # Create your views here.
 
 #对密码进行MD5加密
@@ -162,14 +164,10 @@ def add_goods(request):
         goods.goods_safeDate = goods_safeDate
         goods.goods_image = goods_image
         goods.goods_type = GoodType.objects.get(id= goods_type_id) #一对多的保存方法
+        goods.store_id = Store.objects.get(id = int(goods_store))
         goods.save()
-
 
         #因为是多对多关系所以需要再保存一次
-        goods.store_id.add(
-            Store.objects.get(id = int(goods_store))
-        )
-        goods.save()
         return HttpResponseRedirect('/store/list_goods/up/')
     return render(request,'store/add_goods.html',locals())
 
@@ -319,171 +317,46 @@ def show_type_goods(request):
 
     return
 
+#查看待处理订单表
+def pending_list(request):
+    store_id = request.COOKIES.get('has_store')
+    order_list = OrderDetail.objects.filter(order_id__order_status=2,goods_store=store_id)
+
+    operate = 'pending' #前端操作列的控制信号
+
+    return render(request,'store/order_list.html',locals())
+
+#订单表确认发货
+def order_confirm(request):
+    id = request.GET.get('id') #获取货物详情表的id
+    order_id_id = OrderDetail.objects.get(id=id).order_id_id
+    order = Order.objects.filter(id=order_id_id).first()
+    #把订单状态改成已经收获
+    order.order_status = 3
+    order.save()
+    return redirect('/store/pending_list/')
+
+#订单表拒绝发货
+def order_refuse(request):
+    id = request.GET.get('id') #获取货物详情id
+    oper = request.GET.get('oper')
+    print(oper)
+    order_id_id = OrderDetail.objects.get(id=id).order_id_id
+    order = Order.objects.filter(id=order_id_id).first() #获取货物详情信息
+    order.delete()
+    if oper == 'refuse':
+        return redirect('/store/pending_list/')
+    return redirect('/store/solved_list/')
+
+#已处理商品
+def solved_list(request):
+    store_id = request.COOKIES.get('has_store')
+    order_list = OrderDetail.objects.filter(order_id__order_status=3,goods_store=store_id)
+
+    operate = 'solved' #前端操作列的控制信号
+    return render(request,'store/order_list.html',locals())
 
 
-
-
-
-
-#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-#密码加密
-# def set_password(password):
-#     md5 = hashlib.md5()
-#     md5.update(password.encode())
-#     result = md5.hexdigest()
-#     return result
-#
-# def register(request):
-#     if request.method == "POST":
-#         username = request.POST.get('username')
-#         password = request.POST.get('password')
-#         if username and password:
-#             user = Seller()
-#             user.username = username
-#             user.password = set_password(password)
-#             user.nickname = username
-#             user.save()
-#             return HttpResponseRedirect('/store/login/')
-#     return render(request,'store/register.html')
-#
-# def login(request):
-#     response = render(request,'store/login.html')
-#     response.set_cookie('login_form',"login_page")
-#     if request.method == "POST":
-#         username = request.POST.get('username')
-#         password = request.POST.get('password')
-#         if username and password:
-#             user = Seller.objects.filter(username=username).first()
-#             if user:
-#                 web_password = set_password(password)
-#                 cookies = request.COOKIES.get('login_form')
-#                 if web_password == user.password and cookies == "login_page":
-#                     response = HttpResponseRedirect('/store/index/')
-#                     response.set_cookie('username',username)
-#                     response.set_cookie('user_id',user.id)
-#                     request.session['username'] = username
-#                     return response
-#     return response
-#
-# #登录校验的装饰器
-# def loginVaild(func):
-#     def inner(request,*args,**kwargs):
-#         c_username = request.COOKIES.get('username')
-#         s_username = request.session['username']
-#         if c_username and s_username and c_username==s_username:
-#             user = Seller.objects.filter(username=c_username).first()
-#             if user:
-#                 return func(request,*args,**kwargs)
-#         return HttpResponseRedirect('/store/login/')
-#
-#     return inner
-#
-# @loginVaild
-# def index(request):
-#     """
-#     登录主页面
-#     :param request:
-#     :return:
-#     """
-#     user_id = request.COOKIES.get('user_id')
-#     user_id = int(user_id)
-#     if not user_id:
-#         user_id = 0
-#     store = Store.objects.filter(user_id=user_id).first()
-#     if store:
-#        is_store = 1
-#     else:
-#         is_store = 0
-#
-#     return render(request,'store/index.html',{'user_id':user_id,'is_store':is_store})
-#
-# #退出登录
-# def logout(request):
-#     response = HttpResponseRedirect('/store/login/')
-#     response.delete_cookie('username')
-#     del request.session['username']
-#     return response
-#
-# def register_store(request):
-#     type_list = StoreType.objects.all()
-#     user_id = request.COOKIES.get('user_id')
-#     if request.method == "POST":
-#         post_data = request.POST
-#         store_name = post_data.get('store_name')
-#         store_descripton = post_data.get('store_descripton')
-#         store_phone = post_data.get('store_phone')
-#         store_money = post_data.get('store_money')
-#         store_address =  post_data.get('store_address')
-#
-#         type_lists = post_data.getlist('type')
-#         store_logo = post_data.FILES.get('store_logo')
-#
-#         store = Store()
-#         store.store_name = store_name
-#         store.store_descripton = store_descripton
-#         store.store_phone = store_phone
-#         store.store_money = store_money
-#         store.store_address = store_address
-#         store.store_logo = store_logo
-#         store.user_id = user_id
-#         store.save()
-#
-#         for i in type_list:
-#             store_type = StoreType.objects.get(id = i)
-#             store.type.add(store_type)
-#         store.save()
-#
-#         response = HttpResponseRedirect('/store/index/')
-#         response.set_cookie('has_store',store.id)
-#         return response
-#     return render(request,'store/register_store.html',locals())
-#
-# #添加商品
-# def add_goods(request):
-#     if request.method == "POST":
-#         goods = request.POST
-#         goods_name = goods.get('goods_name')
-#         goods_price = goods.get('goods_price')
-#         goods_number = goods.get('goods_number')
-#         goods_description = goods.get('goods_description')
-#         goods_date = goods.get('goods_date')
-#         goods_safeDate = goods.get('goods_safeDate')
-#         goods_store = goods.get('goods_store')
-#         goods_image = goods.get('goods_image')
-#
-#         #保存数据
-#         goods = Goods()
-#         goods.goods_name = goods_name
-#         goods.goods_price = goods_price
-#         goods.goods_number = goods_number
-#         goods.goods_description = goods_description
-#         goods.goods_date = goods_date
-#         goods.goods_safeDate =goods_safeDate
-#         goods.goods_store = goods_store
-#         goods.goods_image = goods_image
-#         goods.save()
-#
-#         #关联到用户
-#         goods.store_id.add(
-#             Store.objects.get(user_id=goods_store)
-#         )
-#         goods.save()
-#         return HttpResponseRedirect('/store/list_goods/')
-#     return render(request,'store/add_goods.html',locals())
-#
-# def list_goods(request):
-#     page = Goods.objects.all()
-#     keyword = request.GET.get('keywords','')
-#
-#     store = Store.objects.get('has_store')
-#     if keyword:
-#         goods_list = store.goods_set.filter()
-#     p = request.GET.get('page_num',1)
-#     paginator = Paginator(page,3)
-#     page = paginator.page(int(p))
-#     page_range = paginator.page_range
-#
-#     return render(request,'store/goods_list.html',locals())
 
 
 

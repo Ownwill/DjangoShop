@@ -26,22 +26,27 @@
 			<h3>{{ goods_name }}</h3>
 			<p>{{ goods_description }}</p>
 			<div class="prize_bar">
-				<span class="show_pirze">¥<em>{{ goods_price }}</em></span>
+				<span class="show_pirze">¥<em id="price">{{ goods_price }}</em></span>
 				<span class="show_unit">单  位：500g</span>
 			</div>
-			<div class="goods_num clearfix">
-				<div class="num_name fl">数 量：</div>
-				<div class="num_add fl">
-					<input type="text" id="goods_count" class="num_show fl" value="{{ goods_count }}">
-					<a href="#" id="add" class="add fr">+</a>
-					<a href="#" id="sub" class="minus fr">-</a>
-				</div> 
+
+            <form action="/buyer/place_order/" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+			    <div class="goods_num clearfix">
+			    	<div class="num_name fl">数 量：</div>
+			    	<div class="num_add fl">
+			    		<input type="text" id="goods_count" name="count" class="num_show fl" value={{ goods_count }}>
+                        <input type="hidden" id="goods_id" name="goods_id" value="{{ goods_id }}">
+                        <a href="#" id="add" class="add fr" onclick="changeCount('add')">+</a>
+			    		<a href="#" id="sub" class="minus fr" onclick="changeCount('minus')">-</a>
+			    	</div>
+			    </div>
+			    <div class="total">总价：<em id="total_money">{{ total_money }}</em>元</div>
+			    <div class="operate_btn">
+				<input type="submit" class="buy_btn" value="立即购买">立即购买</input>
+				<a href="#" class="add_cart" id="add_cart">加入购物车</a>
 			</div>
-			<div class="total">总价：<em id="total_money">{{ total_money }}</em>元</div>
-			<div class="operate_btn">
-				<a href="javascript:;" class="buy_btn">立即购买</a>
-				<a href="javascript:;" class="add_cart" id="add_cart">加入购物车</a>				
-			</div>
+            </form>
 		</div>
 	</div>
 
@@ -83,75 +88,92 @@
 
 {% block script %}
     <script>
-    $('#add').click(
-            function () {
-                var goods_count = $('#goods_count').val();
-                var url = "/buyer/goods_num_ajax/?id={{ goods_id }}&meth=add&goods_count="+goods_count;
-                $.ajax(
-                    {
-                        url:url,
-                        type:"get",
-                        data:"",
-                        success:function (data) {
-                            var goods_count = data.goods_count;
-                            var total=data.total_money;
-                            document.getElementById("goods_count").value=goods_count;
-                            $("#total_money").html(total);
-
-                        },
-                        error:function(error){
-                            console.log(error)
-                        }
-                    }
-                )
-            }
-        )
-
-    $('#sub').click(
-        function () {
-            var goods_count = $('#goods_count').val();
-            var url = "/buyer/goods_num_ajax/?id={{ goods_id }}&meth=sub&goods_count="+goods_count;
-            $.ajax(
-                {
-                    url:url,
-                    type:"get",
-                    data:"",
-                    success:function (data) {
-                        var goods_count = data.goods_count;
-                        var total=data.total_money;
-                        document.getElementById("goods_count").value=goods_count;
-                        $("#total_money").html(total);
-
-                        },
-                    error:function(error){
-                        console.log(error)
-                    }
+        function changeCount(ty) {
+            var value = $('#goods_count').val();
+            if(ty == 'add'){
+                $('#goods_count').val(++value)
+            }else{
+                if (value<=1){
+                    $('#goods_count').val(1)
+                }else {
+                    $('#goods_count').val(--value)
                 }
-            )
+            }
+            var price = $('#price').text();
+            var total_money=price*value;
+            $('#total_money').text(total_money)
         }
-    )
+    </script>
+
+    <script>
+{#    $('#add').click(#}
+{#            function () {#}
+{#                var goods_count = $('#goods_count').val();#}
+{#                var url = "/buyer/goods_num_ajax/?id={{ goods_id }}&meth=add&goods_count="+goods_count;#}
+{#                $.ajax(#}
+{#                    {#}
+{#                        url:url,#}
+{#                        type:"get",#}
+{#                        data:"",#}
+{#                        success:function (data) {#}
+{#                            var goods_count = data.goods_count;#}
+{#                            var total=data.total_money;#}
+{#                            document.getElementById("goods_count").value=goods_count;#}
+{#                            $("#total_money").html(total);#}
+{##}
+{#                        },#}
+{#                        error:function(error){#}
+{#                            console.log(error)#}
+{#                        }#}
+{#                    }#}
+{#                )#}
+{#            }#}
+{#        )#}
+{##}
+{#    $('#sub').click(#}
+{#        function () {#}
+{#            var goods_count = $('#goods_count').val();#}
+{#            var url = "/buyer/goods_num_ajax/?id={{ goods_id }}&meth=sub&goods_count="+goods_count;#}
+{#            $.ajax(#}
+{#                {#}
+{#                    url:url,#}
+{#                    type:"get",#}
+{#                    data:"",#}
+{#                    success:function (data) {#}
+{#                        var goods_count = data.goods_count;#}
+{#                        var total=data.total_money;#}
+{#                        document.getElementById("goods_count").value=goods_count;#}
+{#                        $("#total_money").html(total);#}
+{##}
+{#                        },#}
+{#                    error:function(error){#}
+{#                        console.log(error)#}
+{#                    }#}
+{#                }#}
+{#            )#}
+{#        }#}
+{#    )#}
+{##}
+{#    $('#add_cart').click(#}
+{#        function () {#}
+{#            var url = url = '/buyer/add_cart/?id={{ goods_id }}&goods_num={{ goods_count }}&total_money={{ total_money }}';#}
+{#            $.ajax(#}
+{#                {#}
+{#                    url:url,#}
+{#                    type:"get",#}
+{#                    data:"",#}
+{#                    success:function (data) {#}
+{#                        console.log(data)#}
+{#                        },#}
+{#                    error:function(error){#}
+{#                        console.log(error)#}
+{#                    }#}
+{#                }#}
+{#            )#}
+{#        }#}
+{#    )#}
+
 
     </script>
 
-{#	<script type="text/javascript" src="/static/buyer/js/jquery-1.12.2.js"></script>#}
-{#	<script type="text/javascript">#}
-{#		var $add_x = $('#add_cart').offset().top;#}
-{#		var $add_y = $('#add_cart').offset().left;#}
-{##}
-{#		var $to_x = $('#show_count').offset().top;#}
-{#		var $to_y = $('#show_count').offset().left;#}
-{##}
-{#		$(".add_jump").css({'left':$add_y+80,'top':$add_x+10,'display':'block'})#}
-{#		$('#add_cart').click(function(){#}
-{#			$(".add_jump").stop().animate({#}
-{#				'left': $to_y+7,#}
-{#				'top': $to_x+7},#}
-{#				"fast", function() {#}
-{#					$(".add_jump").fadeOut('fast',function(){#}
-{#						$('#show_count').html(2);#}
-{#					});#}
-{##}
-{#			});#}
-{#		})#}
-{#	</script>#}
 {% endblock %}
