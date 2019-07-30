@@ -125,7 +125,7 @@ def setOrder_id(user_id,goods_id,store_id):
     :return:
     """
     strtime = time.strftime('%Y%m%d%H%M%S',time.localtime())
-    return strtime+user_id+goods_id+store_id
+    return strtime+str(user_id)+str(goods_id)+str(store_id)
 
 def place_order(request):
 
@@ -161,7 +161,13 @@ def place_order(request):
         detail = [order_detail]                            #把商品详情保存在列表里
         return render(request,'buyer/place_order.html',locals())
     else:
-        return HttpResponse('非法请求')
+        order_id = request.GET.get('order_id')
+        if order_id:
+            order = Order.objects.get(id=order_id)
+            detail = order.orderdetail_set.all()
+            return render(request,'buyer/place_order.html',locals())
+        else:
+            return HttpResponse('非法请求')
 
 #增加减少商品数量
 # def goods_num_ajax(request):
@@ -343,9 +349,45 @@ def addcart(request):
     else:
         result['data'] = '请求错误'
     return JsonResponse(result)
+
 #购物车
 def cart(request):
     #获取用户id并返回用户对应的购物车中的商品
-    user_id = request.COOKIES.get('user_id')
-    goods_list = Cart.objects.filter(user_id=user_id)
+    user_id = request.COOKIES.get('user_id')   #获取用户id
+    goods_list = Cart.objects.filter(user_id=user_id) #获取该用户购物车中对应的所有商品数据
+
+    if request.method == 'POST':
+        post_data = request.POST
+        cart_data = []
+        for k,v in post_data.items():
+            if k.startswith('goods_'):
+                cart_data.append(Cart.objects.get(id=int(v)))
+        goods_count = len(cart_data)
+        goods_total = sum([int(i.goods_total) for i in cart_data])
+
+        #保存订单
+        order = Order()
+        order.order_id= setOrder_id(user_id,goods_count,'2')
+        order.goods_count = goods_count
+        order.order_user = Buyer.objects.get(id=user_id)
+        order.order_price = goods_total
+        order.order_status = 1
+        order.save()
+
+        #保存订单详情
+        for detail in cart_data:
+            order_detail = OrderDetail()
+            order_detail.order_id = order
+            order_detail.goods_id = detail.id
+            order_detail.goods_name = detail.goods_name
+            order_detail.goods_price = detail.goods_price
+            order_detail.goods_number = detail.goods_number
+            order_detail.goods_total = detail.goods_total
+            order_detail.goods_store = detail.goods_store
+            order_detail.goods_image = detail.goods_picture
+            order_detail.save()
+
+        url = '/buyer/place_order/?order_id=%s'%order.id
+        return HttpResponseRedirect(url)
+
     return render(request,'buyer/cart.html',locals())
