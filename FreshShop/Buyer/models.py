@@ -18,13 +18,7 @@ class Address(models.Model):
     post_number = models.CharField(max_length=32,verbose_name='右边')
     buyer_id = models.ForeignKey(to=Buyer,on_delete=models.CASCADE,verbose_name='用户id')
 
-class Cart(models.Model):
-    goods_id = models.IntegerField(verbose_name='商品id')
-    goods_name = models.CharField(max_length=32,verbose_name='商品名称')
-    goods_price = models.FloatField(max_length=32,verbose_name='商品价格')
-    goods_picture = models.ImageField(verbose_name='商品图片')
-    goods_num = models.IntegerField(verbose_name='商品数量')
-    user = models.ForeignKey(to=Buyer,on_delete=models.CASCADE)
+
 
 class Order(models.Model):
     """
@@ -50,3 +44,13 @@ class OrderDetail(models.Model):
     goods_total = models.FloatField(verbose_name='商品总价')
     goods_store= models.IntegerField(verbose_name='商店id')
     goods_image = models.ImageField(verbose_name='商品图片')
+
+class Cart(models.Model):
+    goods_name = models.CharField(max_length=32,verbose_name='商品名称')
+    goods_price = models.FloatField(verbose_name='商品价格')
+    goods_total = models.FloatField(verbose_name='商品总价')
+    goods_number = models.IntegerField(verbose_name='商品数量')
+    goods_picture = models.ImageField(upload_to='buyer/images',verbose_name='商品图片')
+    goods_id = models.IntegerField(verbose_name='商品id')
+    goods_store = models.IntegerField(verbose_name='商品商店')
+    user_id = models.IntegerField(verbose_name='用户id')

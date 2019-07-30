@@ -213,21 +213,24 @@ def place_order(request):
 #
 #     return HttpResponse()
 #
-# #加入购物车
-# def add_cart(request):
-#     goods_id = int(request.GET.get('id')) #获取商品的id
-#     goods_num = request.GET.get('goods_num')
-#     print(goods_num)
-#     goods = Goods.objects.filter(id=goods_id).first()
-#     cart = Cart()
-#     cart.goods_id = goods.id
-#     cart.goods_name = goods.goods_name
-#     cart.goods_price = goods.goods_price
-#     cart.goods_picture = goods.goods_image
-#     cart.goods_num = goods_num
-#     print(goods)
-#     return  HttpResponse('nice')
 
+
+#加入购物车
+def add_cart(request):
+    goods_id = int(request.GET.get('id')) #获取商品的id
+    goods_num = request.GET.get('goods_num')
+    print(goods_num)
+    goods = Goods.objects.filter(id=goods_id).first()
+    cart = Cart()
+    cart.goods_id = goods.id
+    cart.goods_name = goods.goods_name
+    cart.goods_price = goods.goods_price
+    cart.goods_picture = goods.goods_image
+    cart.goods_num = goods_num
+    print(goods)
+    return  HttpResponse('nice')
+
+#用户退出登录
 def logout(request):
     response = HttpResponseRedirect('/buyer/index/')
     for key in request.COOKIES:
@@ -305,3 +308,44 @@ def order_pay(request):
 
     return HttpResponseRedirect('https://openapi.alipaydev.com/gateway.do?' + order_string)
 
+def userCenter_base(request):
+    return render(request,'buyer/userCenter_base.html')
+
+def user_center_info(request):
+    return render(request,'buyer/user_center_info.html')
+
+#加入购物车
+def addcart(request):
+    result = {'state':'error','data':''} #设置返回给前台ajax的状态和数据
+    if request.method == 'POST': #判断请求方式
+        count = int(request.POST.get('count'))       #获取前台ajax传的商品数量
+        goods_id = request.POST.get('goods_id')      #获取前台ajax传来的商品id
+
+        goods = Goods.objects.get(id = int(goods_id))#获取商品表中的对应商品的信息
+        print('%' * 50, count)
+        user_id = request.COOKIES.get('user_id')     #获取cookies中的用户id
+
+        #保存到购物车
+        cart = Cart()
+        cart.goods_name = goods.goods_name
+        cart.goods_price = goods.goods_price
+        cart.goods_total = goods.goods_price*count
+        cart.goods_number = count
+        cart.goods_picture = goods.goods_image
+        cart.goods_id = goods.id
+        cart.goods_store = goods.store_id.id
+        cart.user_id = user_id
+        cart.save()
+
+        #修改状态和数据
+        result['state'] = 'success'
+        result['data'] = '商品添加成功'
+    else:
+        result['data'] = '请求错误'
+    return JsonResponse(result)
+#购物车
+def cart(request):
+    #获取用户id并返回用户对应的购物车中的商品
+    user_id = request.COOKIES.get('user_id')
+    goods_list = Cart.objects.filter(user_id=user_id)
+    return render(request,'buyer/cart.html',locals())
