@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Manager #引入模型管理的方法
 
 class Seller(models.Model):
     username = models.CharField(max_length=32,verbose_name="用户名")
@@ -15,6 +16,8 @@ class StoreType(models.Model):
     store_type = models.CharField(max_length=32,verbose_name="类型名称")
     type_descripton = models.TextField(verbose_name="类型名称")
 
+
+
 class Store(models.Model):
     store_name = models.CharField(max_length=32, verbose_name="店铺名称")
     store_address = models.CharField(max_length=32,verbose_name="店铺地址")
@@ -26,11 +29,26 @@ class Store(models.Model):
     user_id = models.IntegerField(verbose_name="店铺主人")
     type = models.ManyToManyField(to=StoreType,verbose_name="店铺类型")
 
+
+# import datetime
+# class GoodsTypeManage(Manager):
+#     def addType(self,name,picture='store/images/page_1_15.jpg'):
+#         goods_type = GoodType()
+#         goods_type.name = name
+#         now = datetime.datetime.now().strftime('%Y-%m-%d')
+#         goods_type.description = '%s_%s'%(now,name)
+#         goods_type.picture = picture
+#         goods_type.save()
+#         return goods_type.name
+
+
 #商品类型
 class GoodType(models.Model):
     name = models.CharField(max_length=32,verbose_name='商品类型名称')
     description = models.TextField(verbose_name='商品类型描述')
     picture = models.ImageField(upload_to='buyer/images')
+
+    # object = GoodsTypeManage()
 
 #商品
 class Goods(models.Model):

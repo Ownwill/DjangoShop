@@ -5,7 +5,7 @@ from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.http import JsonResponse
-
+from django.db.models import Sum  #导入聚合函数的包
 
 from Buyer.models import *
 from Store.views import set_password
@@ -105,10 +105,11 @@ def goods_list(request):
 
 #商品详情页
 def detail(request):
-    goods_id = request.GET.get('id')
-    if goods_id:
-        goods = Goods.objects.filter(id = int(goods_id)).first()
-        if goods:
+    #前端点击图片通过href="/buyer/detail/?id={{ goods.id }}"，跳转到detail页
+    goods_id = request.GET.get('id')  #获取传来的id
+    if goods_id:  #判断前端有没有传来商品id
+        goods = Goods.objects.filter(id = int(goods_id)).first()  #获取商品表中对应的商品
+        if goods:  #判断商品表中有没有该商品，如果有的话返回商品信息
             goods_name =  goods.goods_name
             goods_price = goods.goods_price
             goods_number = goods.goods_number
@@ -137,7 +138,7 @@ def place_order(request):
         goods = Goods.objects.get(id=goods_id)         #查找到goods表对应的商品
         store_id = goods.store_id.id        #查找到商品对应的商店，商品和商店是多对一关系
 
-        #保存订单表
+        #保存订单表，订单表和订单详情表一对多关系，所以先保存订单表。
         order = Order()
         order.order_id = setOrder_id(str(user_id),str(goods_id),str(store_id)) #订单号
         order.goods_count = count                                              #订单数量
@@ -222,19 +223,19 @@ def place_order(request):
 
 
 #加入购物车
-def add_cart(request):
-    goods_id = int(request.GET.get('id')) #获取商品的id
-    goods_num = request.GET.get('goods_num')
-    print(goods_num)
-    goods = Goods.objects.filter(id=goods_id).first()
-    cart = Cart()
-    cart.goods_id = goods.id
-    cart.goods_name = goods.goods_name
-    cart.goods_price = goods.goods_price
-    cart.goods_picture = goods.goods_image
-    cart.goods_num = goods_num
-    print(goods)
-    return  HttpResponse('nice')
+# def add_cart(request):
+#     goods_id = int(request.GET.get('id')) #获取商品的id
+#     goods_num = request.GET.get('goods_num')
+#     print(goods_num)
+#     goods = Goods.objects.filter(id=goods_id).first()
+#     cart = Cart()
+#     cart.goods_id = goods.id
+#     cart.goods_name = goods.goods_name
+#     cart.goods_price = goods.goods_price
+#     cart.goods_picture = goods.goods_image
+#     cart.goods_num = goods_num
+#     print(goods)
+#     return  HttpResponse('nice')
 
 #用户退出登录
 def logout(request):
@@ -339,7 +340,7 @@ def addcart(request):
         cart.goods_number = count
         cart.goods_picture = goods.goods_image
         cart.goods_id = goods.id
-        cart.goods_store = goods.store_id.id
+        cart.goods_store = goods.store_id.id  #在商品模型中店铺store_id是一个外键，所有需要先获取到店铺对象，再获取到店铺对象的id
         cart.user_id = user_id
         cart.save()
 
@@ -358,12 +359,22 @@ def cart(request):
 
     if request.method == 'POST':
         post_data = request.POST
+
         cart_data = []
         for k,v in post_data.items():
             if k.startswith('goods_'):
                 cart_data.append(Cart.objects.get(id=int(v)))
         goods_count = len(cart_data)
         goods_total = sum([int(i.goods_total) for i in cart_data])
+
+
+        #修改使用聚类查询返回指定商品的总价
+        # cart_data = []
+        # for k,v in post_data.items():
+        #     if k.startswith('goods_'):
+        #         cart_data.append(int(v))
+        # cart_goods = Cart.objects.filter(id__in=cart_data).aggregate(Sum('goods_total'))
+        #
 
         #保存订单
         order = Order()
@@ -378,7 +389,7 @@ def cart(request):
         for detail in cart_data:
             order_detail = OrderDetail()
             order_detail.order_id = order
-            order_detail.goods_id = detail.id
+            order_detail.goods_id = int(detail.goods_id)
             order_detail.goods_name = detail.goods_name
             order_detail.goods_price = detail.goods_price
             order_detail.goods_number = detail.goods_number

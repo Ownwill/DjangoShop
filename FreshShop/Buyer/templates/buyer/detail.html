@@ -89,7 +89,9 @@
 {% block script %}
     <script>
         function changeCount(ty) {
+            //通过id来获取商品数量
             var value = $('#goods_count').val();
+            //如果是点击的增加按钮就让商品数量增加，点击的是减少按钮就让商品数量减少，减少到一的时候就不能再往下减
             if(ty == 'add'){
                 $('#goods_count').val(++value)
 
@@ -101,38 +103,44 @@
                     $('#goods_count').val(--value)
                 }
             }
+            //获取商品价格并且计算总价
             var price = $('#price').text();
             var total_money=price*value;
+            //获取商品总价修改商品总价内容
             $('#total_money').text(total_money)
         }
 
     </script>
     <script>
+            //当点击加入购物车之后，把商品的数量和id信息发送给后台视图。
             $('#add_cart').click(
             function () {
-                var count = $('#goods_count').val();
-                var goods_id = $('#goods_id').val();
-                var sendData = {
+
+                //参数部分
+                var count = $('#goods_count').val();  //获取商品的数量
+                var goods_id = $('#goods_id').val();  //获取商品id
+                var sendData = {                      //把商品的数量和商品id打包，并加入csrf
                     'count':count,
                     'goods_id':goods_id,
                     'csrfmiddlewaretoken':'{{ csrf_token }}'
                 };
                 var url = '/buyer/addcart/';
 
+                //ajax部分
                 $.ajax({
-                    url:url,
-                    type:'post',
-                    data:sendData,
-                    success:function (data) {
+                    url:url,      //请求路径
+                    type:'post',  //请求方式
+                    data:sendData, //请求数据
+                    success:function (data) {  //请求成功
                         console.log(data);
                         alert('商品已加入您的购物车！')
                     },
-                    error:function (error) {
+                    error:function (error) {   //请求失败
                         console.log(error);
                         alert('商品添加失败！')
                     }
-
                 })
+
             }
         )
 

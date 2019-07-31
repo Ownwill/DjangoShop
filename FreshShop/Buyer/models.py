@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.db.models import Manager  #引入自定义的
 # Create your models here.
 class Buyer(models.Model):
     username = models.CharField(max_length=32,verbose_name="用户名")

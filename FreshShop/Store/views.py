@@ -5,9 +5,12 @@ from django.shortcuts import redirect
 from django.http import HttpResponse
 from django.core.paginator import Paginator #引入分页
 from django.http import HttpResponseRedirect
+from rest_framework import viewsets #动静分离部分
+
 
 from Store.models import *
 from Buyer.models import *
+from Store.serializers import *
 # Create your views here.
 
 #对密码进行MD5加密
@@ -356,7 +359,18 @@ def solved_list(request):
     operate = 'solved' #前端操作列的控制信号
     return render(request,'store/order_list.html',locals())
 
+#
+class UserViewSet(viewsets.ModelViewSet):
+    queryset  = Goods.objects.all()
+    serializer_class = UserSerializer
 
+
+class TypeViewSet(viewsets.ModelViewSet):
+    queryset = GoodType.objects.all()
+    serializer_class = GoodsTypeserializer
+
+def ajl(request):
+    return render(request,'store/ajax_goods_list.html')
 
 
 

@@ -53,6 +53,8 @@
 
 {% block script %}
     <script>
+{#        点击全选的时候选中所有商品#}
+
         $('#allBox').click(
             function () {
                 if (this.checked){
@@ -62,6 +64,7 @@
                 }
             }
         );
+{#        点击单个商品的时候把全选的对勾去掉#}
         $('.goods_check').each(
             function () {
                 $(this).click(

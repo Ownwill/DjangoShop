@@ -10,7 +10,7 @@ urlpatterns = [
     path('goods_list/',goods_list),
     path('detail/',detail),
     # path('goods_num_ajax/',goods_num_ajax ),
-    path('add_cart/',add_cart),
+    # path('add_cart/',add_cart),
     path('place_order/',place_order),
     path('user_center_info/',user_center_info),
     path('cart/',cart),

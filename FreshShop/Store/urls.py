@@ -21,3 +21,7 @@ urlpatterns = [
     re_path(r'update_goods/(?P<goods_id>\d+)',update_goods),
     re_path('set_goods/(?P<state>\w+)',set_goods),
 ]
+
+urlpatterns += [
+    path('agl/',ajl),
+]
