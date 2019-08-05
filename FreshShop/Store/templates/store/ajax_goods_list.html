@@ -1,114 +1,226 @@
+{#{% extends 'store/base.html' %}#}
+{##}
+{#{% block style %}#}
+{#    <script src="/static/store/js/modernizr.js"></script>#}
+{#    <script src="/static/store/js/vue.min.js"></script>#}
+{#    <script src="/static/store/js/vue-resource.js"></script>#}
+{#{% endblock %}#}
+{##}
+{#{% block titie %}#}
+{#    商品列表#}
+{#{% endblock %}#}
+{##}
+{#{% block label %}#}
+{#    <a href="/store/add_goods/" class="btn btn-warning">添加商品</a>#}
+{#{% endblock %}#}
+{##}
+{#{% block container %}#}
+{##}
+{#{% verbatim %}#}
+{#    <div  id="goods">#}
+{##}
+{#    <table class="table" >#}
+{#        <thead class="table-info">#}
+{#        <tr>#}
+{#            <th>商品名称</th>#}
+{#            <th>商品价格</th>#}
+{#            <th>商品数量</th>#}
+{#            <th>出厂日期</th>#}
+{#            <th>保质期</th>#}
+{#            <th>操作</th>#}
+{#        </tr>#}
+{#        </thead>#}
+{#        <tbody class="table-active">#}
+{##}
+{#                <tr v-for='goods in goods_list'>#}
+{#                    <td><a href="#">{{ goods.goods_name }}</a></td>#}
+{#                    <td>{{ goods.goods_price }}</td>#}
+{#                    <td>{{ goods.goods_number }}</td>#}
+{#                    <td>{{ goods.goods_date }}</td>#}
+{#                    <td>{{ goods.goods_safeDate }}</td>#}
+{#                    <td>#}
+{#                        <a href="#" class="btn btn-warning">下架</a>#}
+{#                    </td>#}
+{##}
+{#                </tr>#}
+{##}
+{#        </tbody>#}
+{##}
+{#    </table>#}
+{##}
+{#        <ul class="pagination">#}
+{#            <li class="paginate_button page-item" v-for="p in page_range">#}
+{#                <a class="page-link" href="#" v-on:click="get_page_data(p)">{{ p }}</a>#}
+{#            </li>#}
+{#        </ul>#}
+{##}
+{##}
+{#    </div>#}
+{#{% endverbatim %}#}
+{##}
+{##}
+{#{% endblock %}#}
+{##}
+{#{% block script %}#}
+{#    <script src="/static/store/js/vue.min.js"></script>#}
+{#    <script src="/static/store/js/vue-resource.js"></script>#}
+{#    <script>#}
+{#        Vue.use(VueResource);#}
+{#        var vue = new Vue({#}
+{#            el:'#goods',#}
+{#            data:{#}
+{#                goods_list:[],#}
+{#                page_range:[]#}
+{#            },#}
+{#            created:function () {#}
+{#                this.$http.get('/APIgoods/').then(#}
+{#                    function (data) {#}
+{#                            this.goods_list = data.data.results;#}
+{#                            console.log(this.goods_list)#}
+{#                            page_number = Math.ceil(data.data.count/10);#}
+{#                            var page_range = [...new Array(page_number).keys()];#}
+{##}
+{#                            this.page_range = page_range;#}
+{#                    },#}
+{#                    function (error) {#}
+{#                        console.log(error)#}
+{#                    }#}
+{#                )#}
+{#            },#}
+{##}
+{#            methods:{#}
+{#                get_page_data:function (page) {#}
+{#                    this.$http.get('/APIgoods/?page='+page).then(#}
+{#                        function (data) {#}
+{#                            this.goods_list = data.data.results;#}
+{#                            page_number = Math.ceil(data.data.count/10);#}
+{#                            console.log(page_number)#}
+{#                            var page_range = [...new Array(page_number).keys()];#}
+{#                            alert(page_range);#}
+{#                            this.page_range = page_range;#}
+{#                            console.log(data.data);#}
+{#                        },#}
+{#                        function (error) {#}
+{#                            console.log(error)#}
+{#                        }#}
+{#                    )#}
+{#                }#}
+{#            }#}
+{##}
+{#        })#}
+{##}
+{#    </script>#}
+{##}
+{#{% endblock %}#}
+
+
+
+
 {% extends 'store/base.html' %}
 
-{% block style %}
-    <script src="/static/store/js/modernizr.js"></script>
-    <script src="/static/store/js/vue.min.js"></script>
-    <script src="/static/store/js/vue-resource.js"></script>
-{% endblock %}
-
-{% block titie %}
+{% block title %}
     商品列表
 {% endblock %}
 
-{% block label %}
-    <a href="/store/add_goods/" class="btn btn-warning">添加商品</a>
-{% endblock %}
-
 {% block container %}
-
 {% verbatim %}
-    <div  id="goods">
+        <div  id="goods">
 
-    <table class="table" >
-        <thead class="table-info">
-        <tr>
-            <th>商品名称</th>
-            <th>商品价格</th>
-            <th>商品数量</th>
-            <th>出厂日期</th>
-            <th>保质期</th>
-            <th>操作</th>
-        </tr>
-        </thead>
-        <tbody class="table-active">
 
-                <tr v-for='goods in goods_list'>
-                    <td><a href="#">{{ goods.goods_name }}</a></td>
-                    <td>{{ goods.goods_price }}</td>
-                    <td>{{ goods.goods_number }}</td>
-                    <td>{{ goods.goods_date }}</td>
-                    <td>{{ goods.goods_safeDate }}</td>
-                    <td>
-                        <a href="#" class="btn btn-warning">下架</a>
-                    </td>
-
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>商品名称</th>
+                    <th>商品价格</th>
+                    <th>商品数量</th>
+                    <th>出厂日期</th>
+                    <th>保质期</th>
+                    <th>操作</th>
                 </tr>
-
-        </tbody>
-
-    </table>
-
-        <ul class="pagination">
-            <li class="paginate_button page-item" v-for="p in page_range">
-                <a class="page-link" href="#" v-on:click="get_page_data(p)">{{ p }}</a>
-            </li>
-        </ul>
+            </thead>
 
 
-    </div>
+            <tbody>
+            <tr v-for="goods in goods_list">
+                <td><a href="#">{{ goods.goods_name }}</a></td>
+                <td>{{ goods.goods_price }}</td>
+                <td>{{ goods.goods_number }}</td>
+                <td>{{ goods.goods_date }}</td>
+                <td>{{ goods.goods_safeDate }}</td>
+                <td>
+                    <a href="#" class="btn btn-warning" style="">下架</a>
+                </td>
+            </tr>
+            </tbody>
+
+        </table>
+            <!--分页-->
+            <ul class="pagination">
+
+                <li class="paginate_button page-item" v-for="p in page_range">
+                <a href="#" v-on:click="get_page_data(p)" class="page-link">
+                        {{ p }}
+                </a>
+                </li>
+
+            </ul>
+
+        </div>
+
 {% endverbatim %}
-
 
 {% endblock %}
 
 {% block script %}
     <script src="/static/store/js/vue.min.js"></script>
     <script src="/static/store/js/vue-resource.js"></script>
+
+
     <script>
         Vue.use(VueResource);
-        var vue = new Vue({
-            el:'#goods',
-            data:{
-                goods_list:[],
-                page_range:[]
-            },
-            created:function () {
-                this.$http.get('/APIgoods/').then(
-                    function (data) {
-                            this.goods_list = data.data.results;
-                            console.log(this.goods_list)
-                            page_number = Math.ceil(data.data.count/10);
-                            var page_range = [...new Array(page_number).keys()];
-
-                            this.page_range = page_range;
-                    },
-                    function (error) {
-                        console.log(error)
-                    }
-                )
-            },
-
-            methods:{
-                get_page_data:function (page) {
-                    this.$http.get('/APIgoods/?page='+page).then(
+        var vue = new Vue(
+            {
+                el:'#goods',
+                data:{
+                    goods_list:[],
+                    page_range:[]
+                },
+                created:function () {
+                    this.$http.get('/APIgoods/').then(
                         function (data) {
                             this.goods_list = data.data.results;
-                            page_number = Math.ceil(data.data.count/10);
-                            console.log(page_number)
+                            console.log(this.goods_list)
+                            page_number = Math.ceil(data.data.count/3);
                             var page_range = [...new Array(page_number).keys()];
-{#                            alert(page_range);#}
-                            this.page_range = page_range;
-{#                            console.log(data.data);#}
+                            console.log(page_range);
+                            this.page_range = page_range
+
                         },
                         function (error) {
                             console.log(error)
                         }
                     )
+                },
+                methods:{
+                    get_page_data:function (page) {
+                        this.$http.get('/APIgoods/?page='+page).then(
+                            function (data) {
+                                console.log('@!!!!!!!!!!!!');
+                                this.goods_list = data.data.results;
+                                page_number = Math.ceil(data.data.count/3);
+                                var page_range = [...new Array(page_number).keys()];
+                                console.log(page_range);
+                                this.page_range = page_range
+
+                            },
+                            function (error) {
+                                console.log(error)
+                            }
+                        )
+                    }
                 }
             }
-
-        })
-
+        )
     </script>
 
 {% endblock %}

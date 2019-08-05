@@ -7,8 +7,8 @@ from Store.models import GoodType
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
-        model = Goods
-        fields = ['goods_name','goods_price','goods_number','goods_date','goods_safeDate']
+        model = Goods #选用的数据模型
+        fields = ['goods_name','goods_price','goods_number','goods_date','goods_safeDate'] #调用时使用的数据字段
 
 
 class GoodsTypeserializer(serializers.HyperlinkedModelSerializer):

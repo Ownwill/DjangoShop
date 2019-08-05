@@ -22,6 +22,12 @@ urlpatterns = [
     re_path('set_goods/(?P<state>\w+)',set_goods),
 ]
 
+from django.views.decorators.cache import cache_page
+
 urlpatterns += [
     path('agl/',ajl),
+    path('get_add/',get_add),
+    path('lw/',littlewrite),
+    path(r'lw1/',cache_page(10*60)(littlewrite)),
+    #cache_page(10*60)(littlewrite),10*60为缓存时间，littlewrite为路由对应的视图
 ]

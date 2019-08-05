@@ -10,7 +10,7 @@ from rest_framework import viewsets #动静分离部分
 
 from Store.models import *
 from Buyer.models import *
-from Store.serializers import *
+from Store.serializers import * #从当前项目导入的文件
 # Create your views here.
 
 #对密码进行MD5加密
@@ -359,21 +359,56 @@ def solved_list(request):
     operate = 'solved' #前端操作列的控制信号
     return render(request,'store/order_list.html',locals())
 
+#导入过滤器
+from django_filters.rest_framework import DjangoFilterBackend
+
 #
 class UserViewSet(viewsets.ModelViewSet):
-    queryset  = Goods.objects.all()
-    serializer_class = UserSerializer
+    queryset  = Goods.objects.all()    #视图类中的查询方法
+    serializer_class = UserSerializer  #调用serializers.py下UserSerializer方法中的字段
 
+    filter_backends = [DjangoFilterBackend]         #采用哪个过滤器，这里是django自带的过滤器
+    filterset_fields = ['goods_name','goods_price'] #进行查询的字段
 
 class TypeViewSet(viewsets.ModelViewSet):
-    queryset = GoodType.objects.all()
-    serializer_class = GoodsTypeserializer
+    queryset = GoodType.objects.all()        #视图类中的查询方法
+    serializer_class = GoodsTypeserializer  #调用serializers.py下UserSerializer方法中的字段
 
 def ajl(request):
     return render(request,'store/ajax_goods_list.html')
 
+from django.core.mail import send_mail
+def sendMail(request):
+    send_mail('邮件主题','邮件内容','发送者的邮箱',['接收者的邮箱'],fail_silently=False)
+    return HttpResponse('邮件发送成功')
 
+from django.http import JsonResponse
+from CeleryTask.tasks import add
+def get_add(request):
+    add.delay(2,3)  #Celery的任务需要用delay函数触发
+    return JsonResponse({'status':200})
 
+from django.views.decorators.cache import cache_page
+from django.core.cache import cache
+
+@cache_page(60*15)
+def littlewrite(request):
+
+    # def hello():
+    #     return HttpResponse('hello world')
+    rep = HttpResponse('I am response') #定义HttpResponse
+    # rep.render = hello                  #render接收hello方法，前端界面返回的是hello方法的内容
+    # return rep  #返回hello方法里的内容
+
+    store_data = cache.get('store_data') #如果没有返回NONE
+    if store_data:                       #如果缓存中有数据，返回缓存中的数据
+        store_data = store_data
+    else:
+        #如果缓存中没有数据就从数据库中找出数据，然后设置和加入缓存以及返回数据
+        data = Store.objects.all()
+        cache.set('store_data',data,30)
+        store_data = data
+    return render(request,'store/ajax_goods_list.html',locals())
 
 
 

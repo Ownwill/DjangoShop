@@ -40,11 +40,13 @@ INSTALLED_APPS = [
     'Store',
     'Buyer',
     'ckeditor', #配置富文本
+    'djcelery', #celery
     'rest_framework', #添加接口框架app
     'ckeditor_uploader',
 ]
 
 MIDDLEWARE = [
+    'django.middleware.cache.UpdateCacheMiddleware', #缓存首配置
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -52,6 +54,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'FreshShop.middleware.MiddlewareTest',
+    'django.middleware.cache.FetchFromCacheMiddleware', #缓存尾配置
 ]
 
 ROOT_URLCONF = 'FreshShop.urls'
@@ -108,16 +112,17 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
 
+#mysql缓存配置
+
 LANGUAGE_CODE = 'zh-hans'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
-
+USE_TZ = False  #默认时区为UTC
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
@@ -135,11 +140,108 @@ MEDIA_ROOT = os.path.join(BASE_DIR,'static')
 CKEDITOR_UPLOAD_PATH = 'static/upload'
 CKEDITOR_IMAGE_BACKEND = 'pillow'
 
-#
+#REST_FRAMEWORK框架
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES':[
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ],
     'DEFAULT_PAGINATION_CLASS':'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE':3,
+    'DEFAULT_RENDERER_CLASSES':(
+        'utils.rendererresponse.Customrenderer',
+        #utils包名，rendererresponse是py文件名，Customrenderer是py下的类名
+    ),
+
+    #安装
+    'DEFAULT_FILTER_BACKENDS':(
+        #django-filter自带的查询过滤器
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
 }
+
+#配置邮件服务器
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend' #采用smtp服务发送邮件
+EMAIL_USE_TLS = False                #使用tls,SMTP服务器通信时，是否启动TLS链接(安全链接)。
+EMAIL_HOST = 'smtp.qq.com'           #发邮件使用的主机
+EMAIL_PORT = 465                     #主机的端口
+EMAIL_HOST_USER = 'xxxxx@qq.com'     #收件人的邮箱
+EMAIL_HOST_PASSWORD = 'xxxxxxxx'     #密码
+DEFAULT_FROM_EMAIL = 'xx@qq.com'     #发件人的邮箱
+
+
+import djcelery          #导入celery模块
+djcelery.setup_loader()  #进行模块加载
+BROKER_URL = 'redis://127.0.0.1:6379/1'  #redis://127.0.0.1:6379/：任务容器地址，1：数据库地址
+CELERY_IMPORTS = ('CeleryTask.tasks')    #具体的任务文件
+CELERY_TIMEZONE = 'Asia/Shanghai'        #celery市区
+CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler' #scheduler调度程序,celery处理器
+
+#celery的定时器
+from celery.schedules import crontab
+from celery.schedules import timedelta
+#定时器策略
+CELERYBEAT_SCHEDULE = {
+    # u'测试定时器1':{
+    #     'task':'CeleryTask.tasks.taskExample',
+    #     'schedule':timedelta(seconds=30),
+    #     'args':(),
+    # },
+    u'钉钉': {
+        'task': 'CeleryTask.tasks.DingTask', #对顶CeleryTask下tasks.py下的DingTask方法
+        'schedule': timedelta(seconds=3),  #每三秒发送一次
+        'args': (), #参数
+    },
+}
+
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache', #默认使用本地缓存
+#     }
+# }
+#
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache', #申请使用memcache缓存
+#         'LOCATION':[
+#             '127.0.0.1:11211' #memcache端口
+#         ] #memcache地址
+#     }
+# }
+
+#本地缓存
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache', #申请使用memcache缓存
+#     }
+# }
+
+
+
+
+#数据库缓存
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django_redis.cache.RedisCache', #申请使用redisCache缓存
+#         'LOCATION':[
+#             'redis://127.0.0.1:6379/1' #6379/1,redis的端口和第redis的几个库
+#         ],#memcache地址
+#         'OPTIONS':{
+#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',#使用什么来连接redis数据库
+#         },
+#     }
+# }
+
+CACHES = {
+    'default':{
+        'BACKEND':'django.core.cache.backends.db.DatabaseCache',#使用默认数据库缓存
+        'LOCATION':'cachetale', #存放缓存的表
+    }
+}
+
+
+CACHE_MIDDLEWARE_KEY_PREFIX = ''
+"""同一个django项目下，当多个网站共享缓存的时候，可以将该配置指向当前网站的识别，
+这个识别通常是域名，也可以是其他唯一标识该网站的字符，其目的是为了防止多个网站共享
+缓存造成缓存混淆。
+"""
+CACHE_MIDDLEWARE_SECONDS = 600  #生存期
